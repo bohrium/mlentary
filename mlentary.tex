@@ -1,0 +1,1244 @@
+% author:   sam tenka
+% change:   2022-05-11
+% create:   2022-05-11
+
+%==============================================================================
+%=====  0.  DOCUMENT SETTINGS  ================================================
+%==============================================================================
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.0. About and Beyond this Exposition  ~~~~~~~~~~~~~~~~~~~~~~~~
+
+%---------------------  0.0.0. page geometry  ---------------------------------
+\documentclass[11pt, justified]{tufte-book}
+\geometry{
+  left           = 0.90in, % left margin
+  textwidth      = 4.95in, % main text block
+  marginparsep   = 0.15in, % gutter between main text block and margin notes
+  marginparwidth = 2.30in, % width of margin notes
+                 % 0.20in  % width from margin to edge
+}
+
+%---------------------  0.0.1. math packages  ---------------------------------
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+\usepackage{amsmath, amssymb, amsthm, mathtools, bm, euler}
+\usepackage{listings}
+\usepackage{xstring}%hanging, txfonts, ifthen}
+
+%---------------------  0.0.2. graphics packages  -----------------------------
+\usepackage{graphicx, xcolor}
+\usepackage{enumitem}\setlist{nosep}
+\usepackage{float, capt-of}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.1. Header Formatting  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\definecolor{mgrn}{rgb}{0.15, 0.65, 0.05} \newcommand{\grn}{\color{mgrn}}
+\definecolor{mred}{rgb}{0.90, 0.05, 0.05} \newcommand{\red}{\color{mred}}
+\definecolor{mcya}{rgb}{0.10, 0.45, 0.45} \newcommand{\cya}{\color{mcya}}
+\definecolor{mblu}{rgb}{0.05, 0.35, 0.70} \newcommand{\blu}{\color{mblu}}
+\definecolor{mbre}{rgb}{0.30, 0.45, 0.60} \newcommand{\bre}{\color{mbre}}
+\definecolor{mgre}{rgb}{0.55, 0.55, 0.50} \newcommand{\gre}{\color{mgre}}
+
+\newcommand{\offour}[1]{
+    {\tiny \raisebox{0.04cm}{\scalebox{0.9}{$\substack{
+        \IfSubStr{#1}{0}{{\red\blacksquare}}{\square}   
+        \IfSubStr{#1}{1}{{\red\blacksquare}}{\square} \\ 
+        \IfSubStr{#1}{2}{{\red\blacksquare}}{\square}   
+        \IfSubStr{#1}{3}{{\red\blacksquare}}{\square}   
+        %\ifthenelse{\equal{#1}{0}}{{\red\blacksquare}}{\square}
+        %\ifthenelse{\equal{#1}{1}}{{\red\blacksquare}}{\square} \\ 
+        %\ifthenelse{\equal{#1}{2}}{{\red\blacksquare}}{\square}   
+        %\ifthenelse{\equal{#1}{3}}{{\red\blacksquare}}{\square}    
+    }$}}}%
+}
+
+
+
+%\newcommand{\note}[1]{{\blu \textsf{#1}}}
+\newcommand{\attn}[1]{{\red \textsf{#1}}}
+
+%---------------------  0.1.0. tidbit headers  --------------------------------
+\newcommand{\samtitle} [1]{
+  \par\noindent{\Huge \sf \blu #1}
+  \vspace{0.4cm}
+}
+
+\newcommand{\samquote} [2]{
+    \marginnote[-0.4cm]{\begin{flushright}
+    \scriptsize
+        \gre {\it #1} \\ --- #2
+    \end{flushright}}
+}
+
+%---------------------  0.1.1. section headers  -------------------------------
+
+\newcommand{\samsection} [1]{
+  \vspace{0.5cm}
+  \par\noindent{\LARGE \sf \blu #1}
+  \vspace{0.1cm}\par
+}
+
+\newcommand{\samsubsection}[1]{
+  \vspace{0.3cm}
+  \par\noindent{\Large \sf \bre #1}
+  \vspace{0.1cm}\par
+}
+
+\newcommand{\samsubsubsection}[1]{
+   \vspace{0.1cm}
+   \par\noindent{\hspace{-2cm}\normalsize \sc \gre #1} ---
+}
+
+%---------------------  0.1.2. clear the bibliography's header  ---------------
+\usepackage{etoolbox}
+\patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.2. Math Symbols and Blocks  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%---------------------  0.2.0. probability symbols  ---------------------------
+\newcommand{\KL}{\text{KL}}
+\newcommand{\EN}{\text{H}}
+\newcommand{\note}[1]{{\blu \textsf{#1}}}
+
+\newcommand{\scirc}{\mathrel{\mathsmaller{\mathsmaller{\mathsmaller{\circ}}}}}
+\newcommand{\cmop}[2]{{(#1\!\to\!#2)}}
+
+% losses averaged in various ways: 
+\newcommand{\Ein}  {\text{trn}_{\sS}}
+\newcommand{\Einb} {\text{trn}_{\check\sS}}
+\newcommand{\Einc} {\text{trn}_{\sS\sqcup \check\sS}}
+\newcommand{\Egap} {\text{gap}_{\sS}}
+\newcommand{\Eout} {\text{tst}}
+
+
+
+%---------------------  0.2.1. double-struck and caligraphic letters  ---------
+\newcommand{\Aa}{\mathbb{A}}\newcommand{\aA}{\mathcal{A}}
+\newcommand{\Bb}{\mathbb{B}}\newcommand{\bB}{\mathcal{B}}
+\newcommand{\Cc}{\mathbb{C}}\newcommand{\cC}{\mathcal{C}}
+\newcommand{\Dd}{\mathbb{D}}\newcommand{\dD}{\mathcal{D}}
+\newcommand{\Ee}{\mathbb{E}}\newcommand{\eE}{\mathcal{E}}
+\newcommand{\Ff}{\mathbb{F}}\newcommand{\fF}{\mathcal{F}}
+\newcommand{\Gg}{\mathbb{G}}\newcommand{\gG}{\mathcal{G}}
+\newcommand{\Hh}{\mathbb{H}}\newcommand{\hH}{\mathcal{H}}
+\newcommand{\Ii}{\mathbb{I}}\newcommand{\iI}{\mathcal{I}}
+\newcommand{\Jj}{\mathbb{J}}\newcommand{\jJ}{\mathcal{J}}
+\newcommand{\Kk}{\mathbb{K}}\newcommand{\kK}{\mathcal{K}}
+\newcommand{\Ll}{\mathbb{L}}\newcommand{\lL}{\mathcal{L}}
+\newcommand{\Mm}{\mathbb{M}}\newcommand{\mM}{\mathcal{M}}
+\newcommand{\Nn}{\mathbb{N}}\newcommand{\nN}{\mathcal{N}}
+\newcommand{\Oo}{\mathbb{O}}\newcommand{\oO}{\mathcal{O}}
+\newcommand{\Pp}{\mathbb{P}}\newcommand{\pP}{\mathcal{P}}
+\newcommand{\Qq}{\mathbb{Q}}\newcommand{\qQ}{\mathcal{Q}}
+\newcommand{\Rr}{\mathbb{R}}\newcommand{\rR}{\mathcal{R}}
+\newcommand{\Ss}{\mathbb{S}}\newcommand{\sS}{\mathcal{S}}
+\newcommand{\Tt}{\mathbb{T}}\newcommand{\tT}{\mathcal{T}}
+\newcommand{\Uu}{\mathbb{U}}\newcommand{\uU}{\mathcal{U}}
+\newcommand{\Vv}{\mathbb{V}}\newcommand{\vV}{\mathcal{V}}
+\newcommand{\Ww}{\mathbb{W}}\newcommand{\wW}{\mathcal{W}}
+\newcommand{\Xx}{\mathbb{X}}\newcommand{\xX}{\mathcal{X}}
+\newcommand{\Yy}{\mathbb{Y}}\newcommand{\yY}{\mathcal{Y}}
+\newcommand{\Zz}{\mathbb{Z}}\newcommand{\zZ}{\mathcal{Z}}
+
+\newcommand{\sfa}{\mathsf{a}}\newcommand{\fra}{\mathcal{a}}
+\newcommand{\sfb}{\mathsf{b}}\newcommand{\frb}{\mathcal{b}}
+\newcommand{\sfc}{\mathsf{c}}\newcommand{\frc}{\mathcal{c}}
+\newcommand{\sfd}{\mathsf{d}}\newcommand{\frd}{\mathcal{d}}
+\newcommand{\sfe}{\mathsf{e}}\newcommand{\fre}{\mathcal{e}}
+\newcommand{\sff}{\mathsf{f}}\newcommand{\frf}{\mathcal{f}}
+\newcommand{\sfg}{\mathsf{g}}\newcommand{\frg}{\mathcal{g}}
+\newcommand{\sfh}{\mathsf{h}}\newcommand{\frh}{\mathcal{h}}
+\newcommand{\sfi}{\mathsf{i}}\newcommand{\fri}{\mathcal{i}}
+\newcommand{\sfj}{\mathsf{j}}\newcommand{\frj}{\mathcal{j}}
+\newcommand{\sfk}{\mathsf{k}}\newcommand{\frk}{\mathcal{k}}
+\newcommand{\sfl}{\mathsf{l}}\newcommand{\frl}{\mathcal{l}}
+\newcommand{\sfm}{\mathsf{m}}\newcommand{\frm}{\mathcal{m}}
+\newcommand{\sfn}{\mathsf{n}}\newcommand{\frn}{\mathcal{n}}
+\newcommand{\sfo}{\mathsf{o}}\newcommand{\fro}{\mathcal{o}}
+\newcommand{\sfp}{\mathsf{p}}\newcommand{\frp}{\mathcal{p}}
+\newcommand{\sfq}{\mathsf{q}}\newcommand{\frq}{\mathcal{q}}
+\newcommand{\sfr}{\mathsf{r}}\newcommand{\frr}{\mathcal{r}}
+\newcommand{\sfs}{\mathsf{s}}\newcommand{\frs}{\mathcal{s}}
+\newcommand{\sft}{\mathsf{t}}\newcommand{\frt}{\mathcal{t}}
+\newcommand{\sfu}{\mathsf{u}}\newcommand{\fru}{\mathcal{u}}
+\newcommand{\sfv}{\mathsf{v}}\newcommand{\frv}{\mathcal{v}}
+\newcommand{\sfw}{\mathsf{w}}\newcommand{\frw}{\mathcal{w}}
+\newcommand{\sfx}{\mathsf{x}}\newcommand{\frx}{\mathcal{x}}
+\newcommand{\sfy}{\mathsf{y}}\newcommand{\fry}{\mathcal{y}}
+\newcommand{\sfz}{\mathsf{z}}\newcommand{\frz}{\mathcal{z}}
+
+
+      \newcommand{\phdot}{\phantom{.}}
+
+%---------------------  0.2.2. math environments  -----------------------------
+\newtheorem*{qst}{Question}
+\newtheorem*{thm}{Theorem}
+\newtheorem*{lem}{Lemma}
+% ...
+\theoremstyle{definition}
+\newtheorem*{dfn}{Definition}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.3. Section Headers  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+\begin{document}
+\samtitle{mlentary (optional 6.86x notes)}
+
+      What tools can we use to automatically extract,
+      extrapolate, and explain patterns in data?
+      %
+      These notes review the main tools we develop in 6.86x.  As binocular
+      vision deepens and disambiguates, the differences between how our
+      lectures and how these notes organize concepts may also enrich
+      understanding.
+      \begin{marginfigure}
+        \vspace{+0.5cm}
+        \includegraphics[width=1.0\textwidth]{necker}
+        %\includegraphics[width=0.3\textwidth]{face-vase}
+      \end{marginfigure}
+      %
+      \attn{You do not need to read these notes at all} to get an A
+      in this course; conversely, \attn{you may not cite these notes} when
+      justifying work in homework or exams.
+      %
+      %You might enjoy skimming the appendice's three examples. 
+
+  \samsection{A. Prologue} %in three examples}
+
+    %\samsubsection{bird's eye framework}% data flow and goals 
+
+      \samsubsubsection{a whimsical story about automation}
+        We automate when we re-cast the previous generation's \emph{methods} as
+        mere \emph{data} --- data to produce and manipulate. 
+
+        \begin{marginfigure}
+            \includegraphics[width=1.0\textwidth]{seven-days}
+            \caption{%
+              Machine learning continues our human tradition toward the systematic and automatic.
+              %
+              What for one generation is a luckily discovered idea or recipe
+              (bottom tip of red), the next generation refines by
+              careful human thought (green). 
+              %
+              What to one generation is a task (green) requiring human thought
+              is to a future generation merely a routine parameterized by some
+              newly discovered recipe (bottom tip of blue).
+              %
+              And the cycle repeats.
+              %
+              %%\textbf{Left} column: assumed given.
+              %%\textbf{Middle} column: activities in the past done by humans and in the future done by machine.
+              %%\textbf{Right} column: artifacts valuable either directly (top right corner) or because they help (via diagonal arrows) achieve more direct goals. 
+            }
+        \end{marginfigure}
+
+        We once sought safety from floods.  Long ago, if we lived near safe
+        riverbanks it was by luck; we then found we could make unsafe rivers safe
+        by erecting floodwalls.  This was dangerous work, so we built brick
+        laying robots to do the hard part.  The machines needed as input some
+        flood-risk estimates: the location and mud-softnesses of the river banks to
+        work on.
+
+        So we sought flood-risk estimates.  At first, if our city's flood-risk
+        estimates were correct it was by luck; we then found we could translate
+        topographic maps to flood-risk estimates by applying geology ideas.  This
+        was tedious work, so we built computers to do the hard part.  The
+        computers needed as input a risk-estimation \emph{algorithm}: a recipe of
+        the geology rules to calculate through.
+
+        We thus sought risk-estimation algorithms.  At first, if our research
+        center's risk-estimation algorithms were robust to new landscapes it
+        was by luck; we then found we could calibrate our algorithms to
+        historical flood data from many cities.  To find the better of two
+        candidate algorithms, we had to aggregate all their many small success
+        and errors.  This was subtle work, so we developed statistical theories
+        to do the hard part.  The theories needed as input a \emph{machine
+        learning model}: a computationally tractable class of candidate
+        algorithms.
+
+        We thus sought machine learning models.  At first, if our machine
+        learning models were highly predictive it was by luck; we then found
+        general principles to guide model design and selection from domain
+        knowledge. % what will we continue to vreate?
+
+        It is these principles that we study in 6.86x.
+
+        Looking back, these are principles that produce machine learning models
+        that produce risk-estimation algorithms that produce flood-risk estimates
+        that guide the building of floodwalls. 
+
+        \newpage
+    \samsubsubsection{kinds of learning}
+      How do we communicate
+      patterns of desired behavior?
+      %new skills?
+      %to other humans?  
+      %
+      %From most to least explicit,
+      We can teach:\marginnote[-1cm]{%
+          \attn{TODO: five labeled pictures of mushrooms and poison levels
+          (say, ``safe'', ``stomach upsetting'', ``very dangerous'').  A sixth,
+          un-labeled picture with a question mark for its label. 
+          %
+          Make explicit that we view mushrooms are prompts/inputs and poison
+          levels as answers/outputs.  And talk about patterns/hypotheses.
+          }
+      }
+      \begin{description}
+        \item[\textbf{by instruction}:  ]  ``to tell whether a mushroom is poisonous, first look at its gills...'' 
+        \item[\textbf{by example}:      ]  ``here are six poisonous fungi; here, six safe ones.  see a pattern?''
+        \item[\textbf{by reinforcement}:]  ``eat foraged mushrooms for a month; learn from getting sick.''
+      \end{description}
+      %
+      Machine learning is the art of programming computers to learn from such
+      sources.  
+      We'll focus on the most important case: learning from examples.\marginnote{%
+        $\leftarrow$ We'll see in \S E that learning by example is
+        key to the other modes of learning.
+      }
+      %
+      Given a list of $N$ examples of properly answered prompts, we
+      seek a pattern: a map from prompts in $\xX$ to answers in $\yY$.\marginnote{%
+        $\leftarrow$ Actually, we'll soon account for uncertainty by letting
+        patterns map to \emph{probability distributions over} answers (\S B.1); then a
+        program that learns from examples has type\vspace{-0.1cm}
+        $$\vspace{-0.1cm}
+          \lL : (\xX\times \yY)^N \to (\xX\to \text{DistributionsOn}(\yY))
+        $$
+        %
+        Sometimes, the prompt is always the same --- say,
+        ``produce a beautiful melody'' --- and we seek (e.g.) to generate
+        many answers. % and to learn a complicated distribution over the answers.
+        %
+        So-called \textbf{unsupervised learning}
+        thusly focuses on output structure.
+        \textbf{Supervised learning} focuses on the input-output
+        relation.
+        %
+        %We won't take this probabilistic view until page 2. 
+      }
+      %
+      %In symbols,
+      So a program that learns from examples has type\vspace{-0.1cm}
+      $$\vspace{-0.1cm}
+        \lL : (\xX\times \yY)^N \to (\xX\to \yY)
+      $$
+      %
+
+    \samsubsubsection{learning error}
+      Draw examples $\sS : (\xX\times \yY)^N$ %a list of examples
+      from %nature's
+      a distribution $\dD$ on $\xX\times
+      \yY$. 
+      A pattern $f:\xX\to \yY$
+      has \textbf{training error}
+      $
+         \Ein(f) = \Pp_{(x,y)\sim \red{\sS}}[f(x)\neq y] 
+      $
+      %,
+      %an average over examples;
+      and \textbf{testing error}
+      $
+         \Eout(f) = \Pp_{(x,y)\sim \red{\dD}}[f(x)\neq y] 
+      $.
+      %,
+      %an average over nature.
+      %
+      %We want $\lL$ to map $\sS$ to an $f$ with low $\Eout(f)$.\marginnote{%
+      We want low $\Eout(\lL(\sS))$.\marginnote{%
+        %  TODO: mention extereme class-imbalance and bayesian *decision* theory 
+      }
+      We often %define
+      set $\lL$ to %roughly
+      minimize $\Ein$ in a %over a
+      candidates set $\hH \subseteq (\xX\to \yY)$.  Then $\Eout$
+      decomposes
+      into the failures
+      of
+      $\Ein$ to estimate $\Eout$, % (generalization),
+      %of
+      $\lL$ to minimize $\Ein$, and % (optimization), and 
+      %of
+      $\hH$ to contain ``the''
+      %nature's
+      truth: % (approximation): 
+      \newcommand{\minf}[1]{{\inf}_{\hH}}
+      \begin{align*}
+          \Eout(\lL(\sS)) 
+          =~&\Eout(\lL(\sS))      &-\,\,\,&      \Ein(\lL(\sS)) &~\}~& \text{\textbf{generalization} error} \\
+          +~&\Ein(\lL(\sS))       &-\,\,\,& \minf{\hH}(\Ein(f)) &~\}~& \text{\textbf{optimization} error} \\
+          +~&\minf{\hH}(\Ein(f))  &       &                     &~\}~& \text{\textbf{approximation} error}  
+      \end{align*}
+      These terms are in tension.  For example, as $\hH$ grows, the
+      approx.\ error may decrease while the gen.\ error may
+      increase --- this is the ``\textbf{bias-variance} tradeoff''.
+
+      %In this page's final $2.5$cm we give a full example.
+      \begin{marginfigure}
+          \vspace{0.6cm}
+          %
+          \par\noindent
+          Six example $(x,y)$s.  An $x$'s \emph{darkness} is its average
+          pixel darkness; its \emph{width} is the stddev column index weighted
+          by column darkness.  We normalize both to have max value $1.0$:\\ 
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-00}\\\hspace{-0.26cm}\red{$1$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-01}\\\hspace{-0.26cm}\red{$1$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-02}\\\hspace{-0.26cm}\cya{$0$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-01}\\\hspace{-0.26cm}\red{$1$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-04}\\\hspace{-0.26cm}\cya{$0$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-05}\\\hspace{-0.26cm}\cya{$0$}\end{tabular}\\ 
+          %
+          \includegraphics[width=0.48\textwidth]{train.png}%
+          \hspace{0.03\textwidth}%
+          \includegraphics[width=0.48\textwidth]{train-scat.png}\\
+          $3$ hypotheses classify $x$s in the darkness-width plane
+          ($\offour{0}$).  The $(a,b)$ plane ($\offour{1}$) parameterizes
+          linear hypotheses; darker means larger $\Ein$.  $(a,b)=(-20,6)$
+          minimizes $\Ein$ to $0.05$ but on fresh test samples ($\offour{2}$)
+          suffers $\Eout=0.08$.   
+          %
+          \includegraphics[width=0.48\textwidth]{test.png}%
+          \hspace{0.03\textwidth}%
+          \includegraphics[width=0.48\textwidth]{test-scat.png}
+          $\offour{02}$'s axes range $[0, 0.5]$.
+          $\offour{13}$'s axes range $[-99,+99]$; green indicates error $<0.1$.
+      \end{marginfigure}
+    \samsubsubsection{tiny example}
+      $\xX = \{\text{grayscale~}28\!\times\!28\text{-pixel images}\}$; $\yY=\{{\cya{0}},{\red{1}}\}$. %,\cdots,9\}$.
+      %Samples %$(x,y)$ from
+      $\dD$'s samples are photos $x$ of 
+      handwriting of the digit $y$. %handwriting of digit $y$. 
+      %To sample from $\dD$, we ask a human to write digit $y\in \yY$, ask a human to write
+      %that digit, and then photograph their writing.
+      %
+      %Each $x$ has a
+      %width
+      %and
+      %darkness.
+      %
+      $\hH$ contains all ``linear hypotheses'' $f_{a,b}$ %:\xX\to\yY$ defined by
+      defined by:
+      $$
+        f_{a,b}(x) = ~{\cya{0}} \text{~~if~~} a\cdot \text{width}(x) + b\cdot\text{darkness}(x) < 0 \text{~~else~~} {\red{1}} 
+      $$ 
+      Our program $\lL$ loops over all integer pairs $(a,b)$ in $[-99,+99]$ to
+      minimize $\Ein$, giving $(a,b)=(-20,6)$ with $\Ein \approx 5\%$.  We
+      got optimization error $\approx 0$ (albeit by \emph{unscalable
+      brute-force}).  So approximation error $\approx \Ein \approx 5\%$.
+      Indeed, our straight lines are \emph{too simple}: width and darkness lose
+      useful information and the ``true'' boundary looks curved (see $\offour{0}$'s curve).
+      %
+      The testing error $\Eout \approx 8\%$ exceeds $\Ein$: we suffer
+      \emph{generalization error}.
+      %% actually approx error should be measured on the train set, which ain't that bad
+      %
+      In 6.86x we'll address all three italicized issues.
+
+      \attn{Exercise:} {how do $\offour{0}$'s two straight lines and
+      $\offour{1}$'s two marked points correspond?}
+      %
+      \attn{Exercise:} {visualize $\Ein(f_{a,b})$ in the $(a,b)$ plane for
+      $N=1$ training example.}
+      %
+      \attn{Exercise:} {why is generalization error usually positive?}
+
+  \newpage
+  \samsection{B. Linear models}
+    \samsubsection{0. linear approximations} 
+      \samquote{
+        He had bought a large map representing the sea, \\
+        Without the least vestige of land: \\
+        And the crew were much pleased when they found it to be \\
+        A map they could all understand.
+      }{charles dodgson}
+      \samsubsubsection{featurization}  % as an art of 
+        As in the prologue, we represent our input $x$ as a fixed-length list
+        of numbers so that we can treat $x$ with math.  For example, in the
+        prologue we represented each photograph by $2$ numbers: width and
+        darkness.  We could instead have represented each photograph by $784$
+        numbers, one for the brightness at each of the $28\cdot 28=784$ many
+        pixels.  Or by $10$ numbers, each measuring the overlap of $x$'s
+        ink with a ``standard'' photo of the digits $0$ through $9$.
+
+        When we choose how to represent $x$ by a list of numbers, we're
+        choosing a \textbf{featurization}.  We call each number a ``feature''.
+        For example, width and darkness are two features.
+
+        %``width'' and ``darkness'' are \emph{features}: maps $\xX\to \Rr$ used
+        %to pre-process $x$s.
+        \attn{Exercise:} {Beyond width and darkness, what features do you think
+        might help us to separate digits $0$ from $1$ by a line through the origin?  How about $3$ from $8$?}
+
+        %
+        There are lots of interesting featurizations, each making different
+        patterns easier to learn.  So we judge a featurization with respect to
+        the kinds of patterns we use it to learn.  Learning usually happens
+        more accurately, robustly, and interpretably when our featurization is
+        abstract (no irrelevant details) but complete (all relevant details),
+        compressed (hard to predict one feature from the others) but accessible
+        (easy to compute interesting properties).
+
+        Caution: a feature $A(\sfx)$ that is statistically independent from
+        $\sfy$ may still be relevant for predicting $\sfy$.\marginnote{%
+          Example.  Consider the uniform distribution on the four corners of a
+          tetrahedron embedded within the corners of a cube \attn{TODO:
+          graphic}.  The three spatial coordinates give three bit-valued random
+          variables.  Any two of these variables are independent.  But the
+          three together are dependent.
+          \attn{TODO: also do a decision boundary (simpsons style) graph
+          illustrating this phenomenon}
+        }
+        For example, if
+        $A, B$ are two features, it is possible that $A(\sfx), \sfy$ are
+        independent and that $B(\sfx), \sfy$ are independent and yet
+        $(A(\sfx),B(\sfy)), \sfy$ are \emph{dependent}!
+
+        \attn{TODO: example featurization (e.g. MNIST again?)}
+
+      \samsubsubsection{some fun geometry} % pictures!
+        Now say we've decided on a \textbf{featurization} of our input
+        data $x$.
+        $$
+          f_{a,b}(x) = ~0 \text{~~if~~} a\cdot \text{width}(x) + b\cdot\text{darkness}(x) < 0 \text{~~else~~} 1 
+        $$ 
+
+        \attn{Illustrate `averaging' of good features vs `correction' of one feature by another (how much a feature correlates with error)}
+
+      \samsubsubsection{linear algebra} % vectors and co-vectors
+        Linear algebra is the part of geometry that focuses on %the notions of
+        when a point is the origin, when a `line' is a straight, and when two
+        straight lines are parallel.
+        %
+        Linear algebra thus helps us deal with the preceding pictures\marginnote{%
+          $\leftarrow$ It is important to \attn{thoroughly understand these
+          basics} of linear algebra.  Please see \S G.2 for further discussion
+          of these basics. 
+        }
+        mathematically.  The concept of `straight lines' gives a simple,
+        flexible model for extrapolation from known points to unknown points.
+        That is intuitively why linear algebra will be crucial at every stage
+        of 6.86x.
+
+        The elements of linear algebra are \textbf{column vectors} and
+        \textbf{row vectors}.  \attn{FILL IN}
+        Though we represent the two similarly in a
+        computer's memory, they have different geometric meanings.
+        We save 
+        much anguish by remembering the difference.  \attn{FILL IN}
+
+        \attn{FILL IN LINEAR DECISION BOUNDARY! (remark on featurization and
+        argmax nonlinearities)}
+
+        We may \textbf{evaluate} a row vector on a column vector.  \attn{FILL
+        IN} A \textbf{dot product} is a way of translating between row and
+        column vectors.  \attn{FILL IN: DISCUSS GENERALIZATION; (DISCUSS ANGLE, TOO)}
+
+        \attn{FILL IN COMPUTATION AND BASES}
+
+        \attn{VISUAL ILLUSTRATION OF HOW CHOICE OF DOT PRODUCT MATTERS}
+
+      \samsubsubsection{richer outputs}%larger $\yY$s} % $k$-ary classification; regression; probabilities
+        We've learned how to construct a set $\hH$ of candidate patterns 
+        $$
+          f_{\vec w}(\vec x) = \text{threshold}(\vec w\cdot \vec x) 
+        $$
+        that map (a featurization of) a prompt $\vec x$ to a binary answer $y=0$ or $y=1$.
+
+        What if we're interested in predicting a richer kind of $y$?  For
+        example, maybe there are $k$ many possible values for $y$ instead of
+        just $2$.  Or maybe there are infinitely many possible values --- say,
+        if $y$ is a real number.  Or maybe we want the added nuance of
+        predicting probabilities, so that $f$ might output ``20\% chance of
+        label $y=0$ and 80\% chance of label $y=1$'' instead of just ``$y=1$''.
+
+        I'll write formulas and then explain.
+        $$
+          f_{\vec w_i : 0\leq i < k}(\vec x) = \text{argmax}_i(\vec w_i\cdot \vec x) 
+        $$
+        $$
+          f_{\vec w}(\vec x) = \vec w \cdot \vec x
+        $$
+        \attn{TODO: add multi-output regression?}
+        $$
+          f_{\vec w_i  : 0\leq i < k}(\vec x) = \text{normalize}(\exp(\vec w_i \cdot \vec x) : 0\leq i < k)
+        $$
+        \attn{TODO: interpret}
+
+        \attn{TODO: discuss measures of goodness!}
+
+    \samsubsection{1. iterative optimization} 
+      \samquote{
+        Hey Jude, don't make it bad \\
+        Take a sad song and make it better \\
+        Remember to let her under your skin \\
+        Then you'll begin to make it \\
+        Better, better, better, better, better, better, ...
+      }{paul mccartney, john lennon}
+
+      %There are two routes toward reading this subsection.
+      You can \attn{read the passages on ``perceptrons'' and on
+      ``logistic models'' in either order}; it depends on
+      your personality.  Logistic models and perceptrons are two sides of the
+      same coin.  The former is continuous; the latter, discrete.  I prefer
+      to read ``logistic models'' first.
+
+      \samsubsubsection{(stochastic) gradient descent}
+        We have a collection $\hH$ of candidate patterns together with a
+        function $1-\Ein$ that tells us how good a candidate is.\marginnote{%
+          $\leftarrow$ We view $1-\Ein$ as an estimate of our actual notion of ``good'': $1-\Eout$.
+        }
+        %
+        In \S A we found a best candidate by brute-force search over all of
+        $\hH$; this doesn't scale to our linear models, since now $\hH$ is
+        intractably large.
+        %
+        So: \emph{what's a faster algorithm to find (or approximate) a best candidate?}
+
+        A common idea is to start arbitrarily with some $h_0\in \hH$ and
+        repeatedly improve to get $h_1, h_2, \cdots$.  Two questions are:
+        \emph{how do we select $h_{t+1}$ in terms of $h_t$}?  And \emph{how do
+        we know when to stop}?  We'll discuss termination conditions later
+        --- for now, let's agree to stop at $h_{1000}$.   
+
+        As for selecting a next candidate, we'd like to use more detailed
+        information on $h_t$'s inadequacies to inform our proposal $h_{t+1}$.
+        Intuitively, if $h_t$ misclassifies a particular $(x_n, y_n) \in \sS$,
+        then we'd like $h_{t+1}$ to be like $h_t$ but nudged a bit in the
+        direction of accurately classifying $(x_n, y_n)$.
+
+        %
+        \attn{FILL IN FOR PROBABILITIES (LOGISTIC) MODEL} 
+
+        This is the idea of \textbf{gradient descent}.
+        \attn{MOTIVATE AND GIVE PSEUDOCODE FOR STOCHASTIC GD} 
+        
+      \samsubsubsection{%probabilities;
+          logistic models} %``soft''
+      \samsubsubsection{perceptrons} %as constrained logistic regression; ``hard''
+      \samsubsubsection{hinge loss and svms}
+    \samsubsection{2. priors and generalization} 
+      \samquote{
+        I believe that either Jupiter has life or it doesn't.
+        But I neither believe that it does, nor do I believe that it doesn't.
+      }{raymond smullyan}
+      \samsubsubsection{on overfitting}
+      \samsubsubsection{log priors and bayes}
+      \samsubsubsection{$\ell^p$ regularization; sparsity} % eye regularization example!
+      \samsubsubsection{estimating generalization}
+    \samsubsection{3. model selection} 
+      \samquote{
+        All human beings have three lives: public, private, and secret.
+      }{gabriel garc\`ia marquez}
+      \samsubsubsection{taking stock so far}
+      \samsubsubsection{grid/random search}
+      \samsubsubsection{selecting prior strength}
+      \samsubsubsection{overfitting on a validation set}
+    \samsubsection{4. generalization bounds} 
+      \samquote{
+        A foreign philosopher rides a train in Scotland.  Looking out the window,
+        they see a black sheep; they exclaim: ``wow!  at least one side of one sheep is black in Scotland!'' 
+      }{unknown}
+      %\samquote{
+      %  An engineer, a statistician, and a philosopher are riding a train through Scotland.
+      %  They look out the window and sees a black sheep.
+      %  The engineer exclaims, ``Hey!  In Scotland the sheep are black!''
+      %  The statistician corrects the engineer: ``Strictly speaking, all we know is that there's at least one black sheep in Scotland.''
+      %  The philosopher chimes in: ``Strictly speaking, all we know is that is that at least one side of one sheep is black in Scotland.''
+      %}{unknown}
+      \samsubsubsection{dot products and generalization}
+      \samsubsubsection{perceptron bound}
+      \samsubsubsection{dimension bound}
+      \samsubsubsection{margin bound}
+    \samsubsection{5. ideas in optimization} 
+      \samquote{
+        premature optimization is the root of all evil
+      }{donald knuth}
+      \samsubsubsection{local minima} % convexity, initialization}
+      \samsubsubsection{implicit regularization}
+      \samsubsubsection{learning rate schedule}
+      \samsubsubsection{learning rates as dot products} % connects to whitening / pre-conditioning; ties into next subsection on kernels
+    \samsubsection{6. kernels enrich approximations} 
+      \samquote{... animals are divided into (a) those
+        belonging to the emperor; (b) embalmed ones; (c) trained ones; (d)
+        suckling pigs; (e) mermaids; (f) fabled ones; (g) stray dogs; (h) those
+        included in this classification; (i) those that tremble as if they were
+        mad; (j) innumerable ones; (k) those drawn with a very fine camel hair
+        brush; (l) et cetera; (m) those that have just broken the vase; and (n)
+        those that from afar look like flies.
+      }{jorge luis borges}
+      \samsubsubsection{features as pre-processing} % start with example of (x \mapsto (1, x)) bias trick!
+      \samsubsubsection{abstracting to dot products} % mention mercer but don't emphasize
+      \samsubsubsection{kernelized perceptron and svm} % also gaussian process regression?
+      \samsubsubsection{kernelized logistic regression} % leads to nonlinearities...
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \newpage
+  \samsection{C. Nonlinearities}
+    \samsubsection{0. fixed featurization} 
+      \samquote{
+        Doing ensembles and shows is one thing, but being able to front a
+        feature is totally different.  ...  there's something about ... a
+        feature that's unique. 
+      }{michael b.\ jordan}
+    \samsubsection{1. learned featurizations} 
+    \samsubsection{2. differentiation} 
+    \samsubsection{3. architecture and symmetry} 
+      \samquote{
+        About to speak at [conference]. Spilled Coke on left leg of jeans, so poured some water on right leg so looks like the denim fade.
+      }{tony hsieh}
+    \samsubsection{4. feature hierarchies} 
+    \samsubsection{5. stochastic gradient descent} 
+      \samquote{
+        The key to success is failure.
+      }{michael j.\ jordan}
+
+    \samsubsection{6. loss landscape shape} 
+      \samquote{
+        The virtue of maps, they show what can be done with limited space, they foresee that everything can happen therein.
+      }{jos\'e saramago}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \newpage
+  \samsection{D. Structured inference}
+    \samsubsection{0. graphical generative models} 
+      \samquote{
+        ... [to treat] complicated systems in simple ways[,] probability ...
+        implements two principles[:] [the approximation of parts as
+        independent] and [the abstraction of aspects as their averages].
+      }{michael i.\ jordan}
+
+    \samsubsection{1. inferring conditional marginals} 
+    \samsubsection{2. learning the parameters} 
+    \samsubsection{3. hierarchy and mixtures} 
+    \samsubsection{4. hierarchy and transfer} 
+    \samsubsection{5. variational and sampling methods} 
+    \samsubsection{6. amortized inference} 
+      \samquote{
+        Reminding myself that I have a tailbone keeps me in check.
+      }{tig notaro}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \newpage
+  \samsection{E. Reductions to supervision}
+
+    \samsubsection{0. to build a tool, use it} 
+      \samquote{
+        We are what we pretend to be, so we must be careful about what we pretend to be.
+      }{kurt vonnegut}
+
+    \samsubsection{1. distributions as maps} 
+      \samquote{
+        Possession of anything new or expensive only reflected a person's lack of
+        theology and geometry; it could even cast doubts upon one's soul.
+      }{john toole}
+
+    \samsubsection{2. self-supervised: downstream tasks} 
+      \samquote{
+        Be a pattern to others and then all will go well.
+      }{marcus cicero}
+
+    \samsubsection{3. self-supervised: autoregression} 
+      \samquote{
+        When we learn to speak, we learn to translate.
+      }{octavio paz}
+
+      %\samquote{
+      %  for last year's words belong to last year's language \\
+      %  and next year's words await another voice
+      %}{thomas eliot}
+      %\samquote{
+      %  To love is to undress our names.
+      %}{octavio paz}
+
+    \samsubsection{4. reinforcement: exploration-exploitation} 
+      \samquote{
+        We're all curious about what might hurt us.
+      }{frederico garc\'ia lorca}
+
+    \samsubsection{5. reinforcement: states and $q$-values} 
+      \samquote{
+        There's a good reason why nobody studies history: it just teaches you
+        too much.
+      }{noam chomsky}
+
+      \samsubsubsection{on-policy learning}
+      \samsubsubsection{off-policy learning}
+      \samsubsubsection{deep curricula: re-play}
+      \samsubsubsection{deep curricula: self play}
+      \samsubsubsection{the deadly triad}
+
+    \samsubsection{6. beyond the i.i.d.\ hypothesis}
+      \samquote{
+        When I was a boy of 14, my father was ignorant; I could hardly stand to
+        have the old man around. But when I got to be 21, I was astonished at
+        how much the old man had learned in seven years.
+      }{mark twain}
+      \samsubsubsection{out-of-distribution tests}
+      \samsubsubsection{dependent samples}
+      \samsubsubsection{causality}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \newpage
+  \samsection{F. Three brief example projects}
+      Now comes a hurried tour of the kinds of analysis these notes discuss.  I
+      recommend that you \attn{skim} these three example projects without
+      trying to understand each step.
+
+    \samsubsection{1. flooding plains}
+      \samquote{
+        I shall have to accept the fact, I'm afraid, that [their] mind is a
+        very thin soil, laid an inch or two deep upon very barren rock.
+      }{virginia woolf}
+
+      \samsubsubsection{visualization  } % featurization
+        \begin{figure}[h]
+          \centering
+          \includegraphics[width=\textwidth]{hei}
+          \captionof{figure}{
+            In light yellow and blue are land and sea: $6.4\text{km}\times
+            10.4\text{km}$ around the city of Zembla.
+            Gray dots:       untested faucets.
+            Red bowties:     faucets tested positive.
+            Blue I-beams:    faucets tested negative.
+            The small yellow box surrounds a neighborhood that enjoyed more
+            thorough testing; the large yellow box in the lower right magnifies
+            that extra-tested region.
+            %
+            TODO: number of gray dots, among labels: training set vs hidden 
+          }
+        \end{figure}
+
+
+      \samsubsubsection{fitting        } % featurization
+      \samsubsubsection{model selection} % featurization
+      \samsubsubsection{prediction}
+      \samsubsubsection{overfitting}
+
+
+    \samsubsection{1. ancient tablets}
+      \samquote{
+        I am so clever that sometimes I don't understand a single word of what I am saying.
+      }{oscar wilde}
+
+      \samsubsubsection{visualization}
+      \samsubsubsection{transcription}
+      \samsubsubsection{cleaning and imputation}
+      \samsubsubsection{modeling and fitting}
+      \samsubsubsection{generation}
+      \samsubsubsection{a whimsical story about modeling}
+
+    \samsubsection{2. pairing flavors}
+      \samquote{
+        Bread that must be sliced with an ax is bread that is too nourishing.
+      }{fran lebowitz}
+
+      \samsubsubsection{visualization}
+      \samsubsubsection{modeling and fitting}
+      \samsubsubsection{regularization}
+      \samsubsubsection{explanation}
+      \samsubsubsection{domain adaptation}
+      \samsubsubsection{a whimsical story about induction}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \newpage
+  \samsection{Appendices}
+    Here are ``refreshers'' on programming and on math, especially on the math
+    of high dimensions and of bayes' law.  \attn{They can help jog your memory of the
+    math and programming} you hopefully have encountered prior to taking
+    6.86x.\marginnote{%
+      %%Depending on your background and personality, you might recognize and
+      %%care that throughout these notes we are a bit sloppy with our probability
+      %%and programming.  No standard compiler can compile our pseudocode;
+      %%likewise, our theorems are actually theorem sketches in need of
+      %%additional analytic hypotheses. 
+      %%%
+      %%For readers so concerned, we assume an additional prerequisite: enough
+      %%technical background that we may leave implicit both the articulation of
+      %%measure-theory technicalities and the implementation of pseudocode.
+    }
+    They also help establish our naming conventions.
+    %The refreshers are meant
+    %neither to explain these topics nor to provide a complete outline of
+    %prerequisites.
+
+    \samsubsection{python programming refresher}
+      \samquote{
+        If I have not seen as far as others, it is because giants were standing on my shoulders.
+      }{hal abelson}
+
+      \samsubsubsection{setup}
+      \samsubsubsection{state and control flow}
+      \samsubsubsection{input/output}
+      \samsubsubsection{numpy}
+
+    %\samsubsection{math notation and refresher}
+    \samsubsection{probability refresher}
+      \samquote{
+          \begin{flushleft}
+          \texttt{\phantom{}def get\_random\_number():} \\
+          \texttt{\phantom{....}return 4 \# chosen by a fair dice roll} \\
+          \texttt{\phantom{.............}\# guaranteed to be random}
+          \end{flushleft}\phantom{.}
+      }{randall munroe, translated by sam to Python}
+
+      We've tried to use 
+        \vspace{-0.10cm}
+      $$
+        \text{\textsf{sans serif} for the names of random variables,}
+        \vspace{-0.15cm}
+      $$
+      $$
+        \text{\emph{italics} for the values they may take, and}
+      $$
+      $$
+        \text{$\mathcal{CURLY~CAPS}$ for sets of such values.} 
+      $$
+      For example, we write $p_{\sfy|\sfh}(y|h)$ for the probability that the
+      random variable $\sfy$ takes the value $y$ conditioned on the event that
+      the random variable $\sfh$ takes the value $h$.
+      %
+      Likewise, our notation $p_{\hat \sfh|\sfh}(h|h)$ indicates the
+      probability that the random variables $\hat \sfh$ and $\sfh$ agree in
+      value given that $\sfh$ takes a value $h\in \hH$.
+
+    \samsubsection{linear algebra refresher}
+      \samquote{
+        Stand firm in your refusal to remain conscious during algebra.
+        In real life, I assure you, there is no such thing as algebra.
+      }{fran lebowitz}
+
+      %Linear algebra is the part of geometry that focuses on the notions of
+      %when a point is the origin, when a `line' is a straight, and when two
+      %straight lines are parallel.
+      %%
+      %Linear algebra thus helps us deal with the preceding pictures
+      %mathematically.  The concept of `straight lines' gives a simple,
+      %flexible model for extrapolation from known points to unknown points.
+      %That is intuitively why linear algebra will be crucial at every stage
+      %of 6.86x.
+
+      %We'll use only `basic' linear algebra in 6.86x; it is important to
+      %thoroughly understand these basics.
+
+      %The 
+
+    \samsubsection{calculus refresher}
+      %\samquote{
+      %  The self is not something ready-made, but something in continuous
+      %  formation through choice of action.
+      %}{john dewey}
+
+    \samsubsection{high dimensional geometry}
+      \samquote{
+        Can I just say Chris for one moment that I have a new theory about the
+        brontosaurus. ...  This theory goes as follows and begins now. All
+        brontosauruses are thin at one end, much, much thicker in the middle
+        and then thin again at the far end. That is my theory, it is mine, and
+        belongs to me and I own it, and what it is too.
+      }{john cleese}
+
+      \samsubsubsection{visualizing higher dimensions}
+      \samsubsubsection{concentration of measure}
+
+        \begin{lem}[Chernoff]
+            The fraction of heads among $N$ i.i.d.\ flips of a biased coin
+            exceeds its mean $p$ by $g$ with chance at most 
+            $\exp(-Ng^2)$, for $0 \leq p < p+g \leq 1$.
+        \end{lem}
+        \begin{figure}[h]
+            \centering
+            \includegraphics[height=4cm, clip]{chernoff}
+            \caption{{
+                We sample points uniformly at random on $N$
+                sticks, each with three parts: \textbf{green}
+                with length $1-p$, \textbf{red} with length $p$, and
+                \textbf{blue} with length $g$.  We call non-blue points
+                \textbf{boxed} and non-green points \textbf{hollow}.
+            }}
+            \label{fig:chernoff}
+        \end{figure}
+        \begin{proof} \renewcommand{\qedsymbol}{}
+            Let our coin flips arise from sampling points on sticks
+            (Figure \ref{fig:chernoff}), where green means tails, red
+            means heads, and we condition on the event that blues do not occur.
+            %
+            To show that less than $(p+g)N = p^\prime N$ flips are
+            heads is to show --- given that all points are \textbf{boxed} ---
+            that less than $p^\prime N$ points are red. 
+            %
+            For any $M$:
+            {%
+            \begin{align*}
+                    & ~ \Pp[\text{$M$ are red $\mid$ all are boxed}] \\
+                  = & ~ \frac{\Pp[\text{all hollows are red $\mid$ $M$ hollow}] \cdot \Pp[\text{$M$ are hollow}]}{\Pp[\text{all are boxed}] } \\
+                  = & ~ (1 - g/p^\prime)^{M} \cdot (1+g)^{N} \cdot \Pp[\text{$M$ are hollow}]
+            \end{align*}
+            }%
+            We sum over $M\geq p^\prime N$, bound $\Pp[\cdots p^\prime N \cdots] \leq 1$,
+            then invoke $(x \mapsto x^{p^\prime})$'s concavity and
+            $\exp$'s convexity:
+            \begin{align*}
+                &~\Pp[\text{at least $p^\prime N$ are red $\mid$ all are boxed}]
+                \\ \leq
+                &~(1 - g/p^\prime)^{p^\prime N} \cdot (1+g)^{N} \cdot \Pp[\text{at least $p^\prime N$ are hollow}]
+                \\ \leq
+                &~(1 - g)^N \cdot (1 + g)^{N}
+                =
+                (1 - g^2)^N
+                \leq
+                \exp(- Ng^2)
+                ~~~~~\square
+            \end{align*}
+        \end{proof}
+        The Chernoff bound gives us the control over tails we would expect from the
+        Central Limit Theorem, but for finite instead of asymptotically large
+        $N$.  In particular, when we learn from much but finite data, the
+        training error will \textbf{concentrate} near the testing error.
+
+        Indeed, for any $f\in \Hh$, $\Ein(f)$ is the average of $N$ independent 
+        Bernoullis of mean $\Eout(f)$.  So for finite $\Hh$, the gap is
+        probably small:
+        \begin{align*}
+            &~\Pp_{\Ss\sim \Dd^N}[\Egap(\Ll) \geq g] \\
+            \leq 
+            &~\sum_{f\in \Hh} \Pp_{\Ss\sim \Dd^N}[\Eout(f) \geq \Ein(f) + g] \\
+            \leq
+            &~|\Hh| \cdot \exp(-Ng^2)
+        \end{align*}
+
+        For example, if $\Hh$ is parameterized by $P$ numbers, each represented
+        on a computer by $32$ bits, then $|\Hh|\leq 2^{32 P}$ and, with
+        probability $1-\delta$, the gap is less than
+        $$
+            \sqrt{(\log(1/\delta) + 32 P)/N}
+        $$
+        This bound's sensitivity to the description length $32 P$ may seem
+        artificial.  Indeed, the various $\Hh$ used in practice --- e.g.\
+        linear models or neural networks --- depend smoothly on their
+        parameters, so the parameters' least significant bits barely affect 
+        the classifier.  In other words, $\Hh$'s cardinality is not an apt
+        measure of its size.  The VC-dimension measures $\Hh$ more subtly.
+
+      \samsubsubsection{quadratic forms}
+      \samsubsubsection{covariance, correlation, least squares regression}
+
+    \samsubsection{bayesian inference}
+      \samquote{
+        So little of what could happen does happen.
+      }{salvador dal\'i}
+
+      \samsubsubsection{conceptual framework}
+      We're confronted with an observation or dataset $\sfo$ that comes from
+      some unknown underlying pattern $\sfh$.  We know how each possible value
+      $h$ for $\sfh$ induces a distribution on $\sfo$ and we have a prior sense
+      of which $h$s are probable.  Bayes' law helps us update this sense to
+      account for the dataset by relating two functions of $h$:
+      $$
+        \underbrace{p_{\sfh|\sfo}(h|o)}_{\text{posterior}}
+        \propto
+        \underbrace{p_{\sfo|\sfh}(o|h)}_{\text{likelihood}}
+        \cdot
+        \underbrace{p_{\sfh}(h)}_{\text{prior}}
+      $$
+
+      Bayes' law underlies most of our analyses throughout these
+      notes.\marginnote{%
+        $\leftarrow$ Like Newton's $F=ma$, Bayes is by itself inert: to make predictions
+        we'd have to specify our situation's forces or likelihoods.  Continuing
+        the metaphor, we will rarely solve our equations exactly; we'll instead
+        make approximations good enough to build bridges and swingsets.  Still,
+        no one denies that $F=ma$ orients us usefully in the world of physics.
+        So it is with the law of Bayes.
+      }
+
+      Formally, we posit a set $\hH$ of \emph{hypotheses}, a set $\oO$ of
+      possible \emph{observations}, and a set $\aA$ of permitted
+      \emph{actions}.  We assume as given a joint probability measure
+      $p_{\sfo,\sfh}$ on $\oO\times \hH$ and a \emph{cost function}
+      $c:\aA\times \hH \to \Rr$.
+      %
+      That cost function says how much it hurts to take the action $a\in \aA$
+      when the truth is $h\in \hH$.
+      %
+      Our primary aim is to construct a map $\pi:\oO\to \aA$ that makes the
+      expected cost $\Ee_{\sfh,\sfo} \, c(\pi(\sfa); \sfh)$ small.
+
+      Below are three examples.  In each case, we're designing a robotic vacuum
+      cleaner: $\hH$ contains possible floor plans; $\oO$, 
+      possible readings from the robot's sensors.  The examples differ in how
+      they define and interpret $\aA$ and $c$.
+
+      \textbf{A}.  $\aA$ consists of probability distributions over $\hH$. We
+      regard $\pi(o)$ as giving a posterior distribution on $\hH$ upon
+      observation $o$.  Our cost $c(a;h)$ measures the surprise of someone who
+      believes $a$ upon learning that $h$ is true. 
+      %
+      Such \emph{inference problems}, being in a precise sense universal, pose
+      huge computational difficulties; we thus often collapse distributions to
+      points, giving rise to the distinctive challenge of balancing estimation
+      error with structural error.
+
+      \textbf{B}.
+      $\aA$ consists of latitude-longitude pairs, interpreted as a guessed
+      location of the robot's charging station.  The cost $c(a;h)$ measures how
+      distant our guess is from the truth.  
+      %
+      Such \emph{estimation problems} abound in science and engineering; they
+      pose the distinctive challenge of balancing
+      sensitivity-to-misleading-outliers against
+      sensitivity-to-informative-datapoints.
+      %robustness to measurement noise with
+      %centeredness. 
+
+      \textbf{C}.  $\aA$ consists of instructions we may send to the motors,
+      instructions that induce motion through our partially-known room.  The
+      cost $c(a;h)$ incentivizes motion into dusty spaces and penalizes bumping
+      into walls.
+      %
+      We often compose such \emph{decision problems} sequentially; this gives
+      rise to the distinctive challenge of balancing exploration with
+      exploitation.
+
+      \samsubsubsection{effect of prior choice}
+      \samsubsubsection{mixture priors and hierarchy}
+
+      \samsubsubsection{frequentism and choice of prior}
+      %\samquote{
+      %  I am wiser [than he] ... for
+      %  ... he fancies he knows something 
+      %  ... whereas I ... do not fancy I do.
+      %}{socrates}
+      %\samsubsubsection{uniform priors} % jeffries
+        Our engineering culture prizes not just \emph{utility} but also
+        \emph{confidence}, since strong guarantees on our designs allow 
+        composition of our work into larger systems: equality, unlike
+        similarity, is transitive.  For example, we'd often prefer a 99\%
+        guarantee of adequate performance over a 90\% guarantee of ideal
+        performance.  This asymmetry explains our pessimistic obsession with
+        worst-case bounds over best-case bounds, cost functions over fitness
+        functions, and simple models with moderate-but-estimatable errors over
+        rich models with unknownable-but-often-small errors.
+
+        The \emph{frequentist} or \emph{distribution-free} style of statistics
+        continues this risk-averse tradition.  In the fullest instance of this
+        style, we do inference as if the true unknown prior on $\hH$ is chosen
+        adversarially.
+        %
+        That is, we try to find $\pi$ that makes the following error small:
+        $$
+          \max_{p_{\sfh}}
+          \,
+          \Ee_{\sfh \sim p_{\sfh}(\cdot)} \Ee_{\sfo \sim p_{\sfo}(\cdot|\sfh)}
+          \,
+          c(\pi(\sfo); \sfh) 
+        $$
+        %
+        %For example, suppose $\aA=\hH$ and $c(a;h) = [\![a\neq h]\!]$ is the
+        %zero-one cost.
+        %The prior in the minimax pair $(\pi, p_{\sfh})$ tends to be pretty
+        %uniform. 
+        Intuitively, 
+
+        %minimax 
+        %``uniform'' prior
+        %on hypothesis space.
+
+      \samsubsubsection{p-hacking} % likelihoods, confidence intervals 
+      \samsubsubsection{hidden assumptions} % distribution-existence as coherence condition
+
+      \samsubsubsection{(multiple) hypothesis testing}
+      %\samquote{
+      %  The theory of probabilities is at bottom nothing but common sense
+      %  reduced to calculus; it enables us to appreciate with exactness
+      %  [what we] feel with a sort of instinct ...
+      %}{pierre simon laplace}
+
+      Let's now consider the case where $\hH$ is a small and finite.  We
+
+  \newpage
+  \marginnote[-0.05cm]{%
+    \textsc{Table of Contents}
+    \begin{description}
+      %\item[] \vphantom{.} 
+      %  \begin{description}
+      %  \end{description}
+      \item[A. Prologue] \phdot 
+        %\begin{description}
+        %  \item[bird's eye framework] \phdot
+        %\end{description}
+      \item[B. Linear classification] \phdot
+        \begin{description}
+          \item[linear approximations] \phdot % hypothesis class; briefly mention regression
+          \item[iterative optimization] \phdot % perceptron, logistic
+          \item[generalization bounds] \phdot % generalization bounds
+          \item[model selection] \phdot % validation, featurization from domain knowledge, which objective func?
+          \item[priors and generalization] \phdot % priors and regularization
+          \item[optimization tricks] \phdot % convex optimization; implicit regularization
+          \item[kernels enrich approximations] \phdot
+        \end{description}
+      \item[C. Nonlinearities] \phdot
+        \begin{description}
+          \item[fixed featurization] \phdot % classic nonlinearities: discrete-continuous (softmax; embedding); normalization; binning 
+          \item[learned featurizations] \phdot
+          \item[differentiation] \phdot % smoothness assumption, backprop as dynaprog, autodiff
+          \item[architecture and symmetry] \phdot % CNNs, RNNs
+          \item[feature hierarchies] \phdot % 
+          \item[stochastic gradient descent] \phdot % learning rates as riemannian metrics; conditioning; annealing
+          \item[loss landscape shape] \phdot % thinking about minima etc
+        \end{description}
+      \item[D. Structured inference] \phdot
+        \begin{description}
+          \item[graphical generative models] \phdot % directed models
+          \item[inferring conditional marginals] \phdot
+          \item[learning parameters] \phdot % spectre of marginal likelihood; EM, other variational methods, MCMC
+          \item[hierarchy and mixtures] \phdot
+          \item[hierarchy and transfer] \phdot
+          \item[variational and sampling methods] \phdot % - tie in with deep learning 
+          \item[amortized inference] \phdot % - tie in with deep learning 
+        \end{description}
+      \item[E. Reductions to supervision] \phdot
+        \begin{description}
+          \item[to build a tool, use it] \phdot
+          \item[distributions as maps] \phdot
+          \item[self-supervised: downstream tasks] \phdot
+          \item[self-supervised: autoregression] \phdot
+          \item[reinforcement: exploration-exploitation] \phdot
+          \item[reinforcement: states and $q$-values] \phdot
+              % another paradigm: learning-from-instruction
+          \item[beyond i.i.d.] \phdot
+        \end{description}
+      \item[F. Three brief example projects]   \phdot 
+        \begin{description}
+          \item[example: flooding plains] \phdot
+          \item[example: ancient tablets] \phdot
+          \item[example: pairing flavors] \phdot
+        \end{description}
+      \item[G. Appendices] \phdot 
+        \begin{description}
+          \item[python refresher] \phdot
+          \item[probability refresher] \phdot
+          \item[linear algebra refresher] \phdot
+          \item[calculus refresher] \phdot
+          \item[notes on high dimensions] \phdot
+          \item[notes on bayes' law] \phdot
+              %
+        \end{description}
+    \end{description}
+  }
+
+
+
+\end{document}
+
