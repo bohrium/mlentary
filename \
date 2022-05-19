@@ -195,16 +195,15 @@
       %These notes complement lecture.
       %
       As binocular vision deepens and disambiguates, these notes 
-      may aid review of the lectures by giving
+      may aid digestion of the lectures by giving
       a complementary
       organization of concepts.
       \begin{marginfigure}
-        \centering
-        \vspace{+0.3cm}
-        \par\noindent\includegraphics[width=0.8\textwidth]{necker}
+        \vspace{+0.5cm}
+        \par\indent\includegraphics[width=1.0\textwidth]{necker}
         %\includegraphics[width=0.3\textwidth]{face-vase}
-        \vspace{-0.1cm}
-        %\caption{Cube}
+        \vspace{-0.3cm}
+        \caption{Cube}
       \end{marginfigure}
       %
       \attn{You do not need to read these notes at all} to get an A
@@ -217,15 +216,6 @@
 
     %\samsubsection{bird's eye framework}% data flow and goals 
 
-        \begin{marginfigure}
-          \vspace{+0.1cm}
-          \par\noindent\includegraphics[width=\textwidth]{supervised}\\
-          Learning from examples means taking a table of ``training''
-          examples as input and producing a ``pattern'' as output.  We
-          evaluate the pattern on ``testing'' prompts to make predictions.
-          %\captionof{figure}{}
-        \end{marginfigure}
-
     \samsubsubsection{kinds of learning}
       How do we communicate
       patterns of desired behavior?
@@ -233,7 +223,15 @@
       %to other humans?  
       %
       %From most to least explicit,
-      We can teach:
+      We can teach:\marginnote[-1cm]{%
+          \attn{TODO: five labeled pictures of mushrooms and poison levels
+          (say, ``safe'', ``stomach upsetting'', ``very dangerous'').  A sixth,
+          un-labeled picture with a question mark for its label. 
+          %
+          Make explicit that we view mushrooms are prompts/inputs and poison
+          levels as answers/outputs.  And talk about patterns/hypotheses.
+          }
+      }
       \begin{description}
         \item[\textbf{by instruction}:  ]  ``to tell whether a mushroom is poisonous, first look at its gills...'' 
         \item[\textbf{by example}:      ]  ``here are six poisonous fungi; here, six safe ones.  see a pattern?''
@@ -242,24 +240,17 @@
       %
       Machine learning is the art of programming computers to learn from such
       sources.  
-      We'll focus on the most important case: learning from examples (\S E shows how this case unlocks the others).
-      %  key to the other modes of learning.).
-      %\marginnote{%
-      %  $\leftarrow$ We'll see in \S E that learning by example is
-      %  key to the other modes of learning.
-      %}
+      We'll focus on the most important case: learning from examples.\marginnote{%
+        $\leftarrow$ We'll see in \S E that learning by example is
+        key to the other modes of learning.
+      }
       %
       Given a list of $N$ examples of properly answered prompts, we
-      seek a pattern: a map from prompts to answers.
-      %In symbols,
-      Say $\xX$ is the set of prompts; $\yY$, of answers.
-      Then a program that learns from examples has type:\marginnote{%
-        $\leftarrow$ We'll soon allow %account for
-        uncertainty by letting
-        patterns map to \emph{probability distributions} answers (\S B.1); then an
-        example-based learner
-        has type:\vspace{-0.15cm}
-        $$\vspace{-0.15cm}
+      seek a pattern: a map from prompts in $\xX$ to answers in $\yY$.\marginnote{%
+        $\leftarrow$ Actually, we'll soon account for uncertainty by letting
+        patterns map to \emph{probability distributions over} answers (\S B.1); then a
+        program that learns from examples has type\vspace{-0.1cm}
+        $$\vspace{-0.1cm}
           \lL : (\xX\times \yY)^N \to (\xX\to \text{DistributionsOn}(\yY))
         $$
         %
@@ -274,7 +265,9 @@
         %
         %We won't take this probabilistic view until page 2. 
       }
-      %\vspace{-0.1cm}
+      %
+      %In symbols,
+      So a program that learns from examples has type\vspace{-0.1cm}
       $$\vspace{-0.1cm}
         \lL : (\xX\times \yY)^N \to (\xX\to \yY)
       $$
@@ -413,8 +406,8 @@
       }{charles dodgson}
       \samsubsubsection{featurization}  % as an art of 
         As in the prologue, we represent our input $x$ as a fixed-length list
-        of numbers so that we can treat $x$ with math.  There,
-        we represented each photograph by $2$ numbers: width and
+        of numbers so that we can treat $x$ with math.  For example, in the
+        prologue we represented each photograph by $2$ numbers: width and
         darkness.  We could instead have represented each photograph by $784$
         numbers, one for the brightness at each of the $28\cdot 28=784$ many
         pixels.  Or by $10$ numbers, each measuring the overlap of $x$'s
@@ -426,26 +419,19 @@
 
         %``width'' and ``darkness'' are \emph{features}: maps $\xX\to \Rr$ used
         %to pre-process $x$s.
+        \attn{Exercise:} {Beyond width and darkness, what features do you think
+        might help us to separate digits $0$ from $1$ by a line through the origin?  How about $3$ from $8$?}
 
-        \attn{TODO: mention one-hot, etc}
-        \attn{TODO: mention LOWRANK for multiregression}
         %
         There are lots of interesting featurizations, each making different
         patterns easier to learn.  So we judge a featurization with respect to
-        the kinds of patterns we use it to learn.
-        \attn{TODO: graphic of separability; and how projection can reduce it}
-        Learning usually happens
+        the kinds of patterns we use it to learn.  Learning usually happens
         more accurately, robustly, and interpretably when our featurization is
         abstract (no irrelevant details) but complete (all relevant details),
         compressed (hard to predict one feature from the others) but accessible
         (easy to compute interesting properties).
 
-
-        \attn{Exercise:} {Beyond width and darkness, what features do you think
-        might help us to separate digits $0$ from $1$ by a line through the origin?  How about $3$ from $8$?}
-
-
-      \samsubsubsection{geometry of feature-space} % pictures!
+      \samsubsubsection{some fun geometry} % pictures!
 
         Caution: a feature $A(\sfx)$ that is statistically independent from
         $\sfy$ may still be relevant for predicting $\sfy$.\marginnote{%
@@ -460,7 +446,7 @@
         For example, if
         $A, B$ are two features, it is possible that $A(\sfx), \sfy$ are
         independent and that $B(\sfx), \sfy$ are independent and yet
-        $A(\sfx),B(\sfx), \sfy$ are \emph{dependent}!
+        $(A(\sfx),B(\sfy)), \sfy$ are \emph{dependent}!
 
         \attn{TODO: example featurization (e.g. MNIST again?)}
 
@@ -517,7 +503,7 @@
         What if we're interested in predicting a richer kind of $y$?  For
         example, maybe there are $k$ many possible values for $y$ instead of
         just $2$.  Or maybe there are infinitely many possible values --- say,
-        if $y$ is a real number or a length-$l$ list of real numbers.  Or maybe we want the added nuance of
+        if $y$ is a real number.  Or maybe we want the added nuance of
         predicting probabilities, so that $f$ might output ``20\% chance of
         label $y=0$ and 80\% chance of label $y=1$'' instead of just ``$y=1$''.
 
@@ -536,9 +522,6 @@
 
         \attn{TODO: discuss measures of goodness!}
 
-        \attn{TODO: talk about structured (trees/sequences/etc) output!}
-
-        \newpage
     \samsubsection{1. iterative optimization} 
       \samquote{
         Hey Jude, don't make it bad \\
@@ -586,16 +569,10 @@
         This is the idea of \textbf{gradient descent}.
         \attn{MOTIVATE AND GIVE PSEUDOCODE FOR STOCHASTIC GD} 
         
-      \samsubsubsection{logistic models} %``soft''
+      \samsubsubsection{%probabilities;
+          logistic models} %``soft''
       \samsubsubsection{perceptrons} %as constrained logistic regression; ``hard''
-        We get a historically crucial and intuition-pumping algorithm when we
-        do logistic regression under the constraint that the weight vectors be
-        \emph{very long}.
       \samsubsubsection{hinge loss and svms}
-        Logistic ain't the only way to go in classification.  Here we discuss
-        a generalization and the merits of various special cases.
-
-      \newpage
     \samsubsection{2. priors and generalization} 
       \samquote{
         I believe that either Jupiter has life or it doesn't.
@@ -605,8 +582,6 @@
       \samsubsubsection{log priors and bayes}
       \samsubsubsection{$\ell^p$ regularization; sparsity} % eye regularization example!
       \samsubsubsection{estimating generalization}
-
-      \newpage
     \samsubsection{3. model selection} 
       \samquote{
         All human beings have three lives: public, private, and secret.
@@ -615,8 +590,6 @@
       \samsubsubsection{grid/random search}
       \samsubsubsection{selecting prior strength}
       \samsubsubsection{overfitting on a validation set}
-
-      \newpage
     \samsubsection{4. generalization bounds} 
       \samquote{
         A foreign philosopher rides a train in Scotland.  Looking out the window,
@@ -633,8 +606,6 @@
       \samsubsubsection{perceptron bound}
       \samsubsubsection{dimension bound}
       \samsubsubsection{margin bound}
-
-      \newpage
     \samsubsection{5. ideas in optimization} 
       \samquote{
         premature optimization is the root of all evil
@@ -643,8 +614,6 @@
       \samsubsubsection{implicit regularization}
       \samsubsubsection{learning rate schedule}
       \samsubsubsection{learning rates as dot products} % connects to whitening / pre-conditioning; ties into next subsection on kernels
-
-      \newpage
     \samsubsection{6. kernels enrich approximations} 
       \samquote{... animals are divided into (a) those
         belonging to the emperor; (b) embalmed ones; (c) trained ones; (d)
@@ -662,26 +631,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   \newpage
-  \samsection{An Intermezzo}
-    Congrats!  If you've digested all the above, then you've digested by far
-    the most important part of these notes.
-    %
-    I invite you to take a break, make a sandwich, drink some coffee, enjoy
-    a walk, before proceeding.
-
-    To accompany your break, below is some poetry generated by a rudimentary
-    language model.  You'll be able to completely understand how it works; that
-    said, it doesn't work well.  The tools of the next section can drastically
-    improve this model.
-
-    \samsubsubsection{Method}
-
-
-    \samsubsubsection{Output}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-  \newpage
   \samsection{C. Nonlinearities}
     \samsubsection{0. fixed featurization} 
       \samquote{
@@ -689,43 +638,22 @@
         feature is totally different.  ...  there's something about ... a
         feature that's unique. 
       }{michael b.\ jordan}
-      \newpage
     \samsubsection{1. learned featurizations} 
-      \newpage
     \samsubsection{2. differentiation} 
-      \newpage
     \samsubsection{3. architecture and symmetry} 
       \samquote{
         About to speak at [conference]. Spilled Coke on left leg of jeans, so poured some water on right leg so looks like the denim fade.
       }{tony hsieh}
-      \newpage
     \samsubsection{4. feature hierarchies} 
-      \newpage
     \samsubsection{5. stochastic gradient descent} 
       \samquote{
         The key to success is failure.
       }{michael j.\ jordan}
 
-      \newpage
     \samsubsection{6. loss landscape shape} 
       \samquote{
         The virtue of maps, they show what can be done with limited space, they foresee that everything can happen therein.
       }{jos\'e saramago}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-  \newpage
-  \samsection{An Intermission}
-    Congrats!  If you've digested all the above, then you've digested by far
-    the most important part of these notes.
-    %
-    I invite you to take a break, make a sandwich, drink some coffee, enjoy
-    a walk, before proceeding.
-
-    To accompany your break, below is some poetry generated by a rudimentary
-    language model.  You'll be able to completely understand how it works; that
-    said, it doesn't work well.  The tools of the next section can drastically
-    improve this model.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -738,43 +666,25 @@
         independent] and [the abstraction of aspects as their averages].
       }{michael i.\ jordan}
 
-      \newpage
     \samsubsection{1. inferring conditional marginals} 
-      \newpage
     \samsubsection{2. learning the parameters} 
-      \newpage
     \samsubsection{3. hierarchy and mixtures} 
       \samquote{
         I like crossing the imaginary boundaries people set up between different fields --- it's very refreshing.
       }{maryam mirzakhani}
-      \newpage
     \samsubsection{4. hierarchy and transfer} 
-      \newpage
     \samsubsection{5. variational and sampling methods} 
       \samquote{
         Take a chance, won't you?
         Knock down the fences that divide.
       }{thurgood marshall}
-      \newpage
     \samsubsection{6. amortized inference} 
       \samquote{
         Reminding myself that I have a tailbone keeps me in check.
       }{tig notaro}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  \newpage
-  \samsection{A Divertisment}
-    Congrats!  If you've digested all the above, then you've digested by far
-    the most important part of these notes.
-    %
-    I invite you to take a break, make a sandwich, drink some coffee, enjoy
-    a walk, before proceeding.
 
-    To accompany your break, below is some poetry generated by a rudimentary
-    language model.  You'll be able to completely understand how it works; that
-    said, it doesn't work well.  The tools of the next section can drastically
-    improve this model.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -786,7 +696,6 @@
         We are what we pretend to be, so we must be careful about what we pretend to be.
       }{kurt vonnegut}
 
-      \newpage
     \samsubsection{1. distributions as maps} 
       \samquote{
         For me, sampling is a high art.
@@ -798,7 +707,6 @@
       %  theology and geometry; it could even cast doubts upon one's soul.
       %}{john toole}
 
-      \newpage
     \samsubsection{2. self-supervised: downstream tasks} 
       \samquote{
         Find out who you are and do it on purpose.
@@ -807,7 +715,6 @@
       %  Be a pattern to others and then all will go well.
       %}{marcus cicero}
 
-      \newpage
     \samsubsection{3. self-supervised: autoregression} 
       \samquote{
         When we learn to speak, we learn to translate.
@@ -821,13 +728,11 @@
       %  To love is to undress our names.
       %}{octavio paz}
 
-      \newpage
     \samsubsection{4. reinforcement: exploration-exploitation} 
       \samquote{
         We're all curious about what might hurt us.
       }{frederico garc\'ia lorca}
 
-      \newpage
     \samsubsection{5. reinforcement: states and $q$-values} 
       \samquote{
         There's a good reason why nobody studies history: it just teaches you
@@ -840,7 +745,6 @@
       \samsubsubsection{deep curricula: self play}
       \samsubsubsection{the deadly triad}
 
-      \newpage
     \samsubsection{6. beyond the i.i.d.\ hypothesis}
       \samquote{
         When I was a boy of 14, my father was ignorant; I could hardly stand to
@@ -850,19 +754,6 @@
       \samsubsubsection{out-of-distribution tests}
       \samsubsubsection{dependent samples}
       \samsubsubsection{causality}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-  \newpage
-  \samsection{A Farewell}
-    Congrats!  If you've digested all the above, then you've digested by far
-    the most important part of these notes.
-    %
-    I invite you to take a break, make a sandwich, drink some coffee, enjoy
-    a walk, before proceeding.
-
-    Congrats!  
-    \samsubsubsection{Further Reading}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1041,51 +932,43 @@
       \samsubsubsection{state and control flow}
         % use-mention distinction; syntax-semantic.s  Asimov ROBOT
 
-        \attn{finite state automata; skip, abort}
-        \attn{variable cube; assignment}
+        \attn{FINITE STATE AUTOMATA; SKIP, ABORT}
+        \attn{VARIABLE CUBE; ASSIGNMENT}
         \marginnote{%
           Once you learn how to program, I highly recommend reading Edsger
           Dijkstra's \emph{A Discipline of Programming}.  That book contains
           many beautiful viewpoints that made me a better programmer.
         }
         %
-        \attn{sequencing}
-        \attn{conditionals} % also mention trivalent CHOICE operator?  
-        \attn{iteratives}
+        \attn{SEQUENCING}
+        \attn{CONDITIONALS}
+        \attn{ITERATIONS}
         \marginnote{%
           % for-range idiom; break, continue, else in loops 
         }
-        \attn{nesting, (scope?,) indentation}
+        \attn{NESTING, SCOPE, INDENTATION}
 
       \samsubsubsection{routines}
         %\attn{mention SCOPE somewhere (perhaps earlier than this passage?)}
-        \attn{lambdas}
-        \attn{\texttt{def}d functions (ordinary args, return)}
-        \attn{interfaces: (kwargs; None as default return value; sentinels; more)}
-        \attn{code architecture and hygiene}
+        \attn{FILL IN }
       \samsubsubsection{data in aggregate}%container structures}
-        \attn{lists and numpy arrays} % no tuples
-        \attn{dictionaries} % no sets; mention cacheing (and hence also global scope??)
-        \attn{comprehensions}
-        \attn{functional idioms}
+        \attn{FILL IN }
       \samsubsubsection{input/output}
         \attn{print formatting and flushing}
-        \attn{basic string manipulations (strip, join, etc)}
-        \attn{file io}
-        \attn{command line arguments}
-        \attn{example: read csv}
-        %
-        \attn{random generation and seeds??}
+        \attn{print formatting}
       \samsubsubsection{how not to invent the wheel} %modules: os, numpy, matplotlib}
-        \attn{matplotlib.plot}
-        \attn{numpy}
-        \attn{os}
+        \attn{FILL IN }
         \attn{package managers etc}
+
+    \samsubsection{numpy programming refresher}
+
       \samsubsubsection{arrays aka tensors}
-        \attn{}
-        \attn{}
-        \attn{}
-        \attn{}
+      \samsubsubsection{}
+      \samsubsubsection{}
+      \samsubsubsection{}
+      \samsubsubsection{}
+      \samsubsubsection{}
+
 
     %\samsubsection{math notation and refresher}
     \samsubsection{probability refresher}
@@ -1115,38 +998,20 @@
         In real life, I assure you, there is no such thing as algebra.
       }{fran lebowitz}
 
-      Linear algebra is the part of geometry that focuses on %the notions of
-      when a point is the origin, when a `line' is a straight, and when two
-      straight lines are parallel.
-      %
-      Linear algebra thus helps us deal with the preceding pictures\marginnote{%
-        $\leftarrow$ It is important to \attn{thoroughly understand these
-        basics} of linear algebra.  Please see \S G.2 for further discussion
-        of these basics. 
-      }
-      mathematically.  The concept of `straight lines' gives a simple,
-      flexible model for extrapolation from known points to unknown points.
-      That is intuitively why linear algebra will be crucial at every stage
-      of 6.86x.
+      %Linear algebra is the part of geometry that focuses on the notions of
+      %when a point is the origin, when a `line' is a straight, and when two
+      %straight lines are parallel.
+      %%
+      %Linear algebra thus helps us deal with the preceding pictures
+      %mathematically.  The concept of `straight lines' gives a simple,
+      %flexible model for extrapolation from known points to unknown points.
+      %That is intuitively why linear algebra will be crucial at every stage
+      %of 6.86x.
 
-      The elements of linear algebra are \textbf{column vectors} and
-      \textbf{row vectors}.  \attn{FILL IN}
-      Though we represent the two similarly in a
-      computer's memory, they have different geometric meanings.
-      We save 
-      much anguish by remembering the difference.  \attn{FILL IN}
+      %We'll use only `basic' linear algebra in 6.86x; it is important to
+      %thoroughly understand these basics.
 
-      \attn{FILL IN LINEAR DECISION BOUNDARY! (remark on featurization and
-      argmax nonlinearities)}
-
-      We may \textbf{evaluate} a row vector on a column vector.  \attn{FILL
-      IN} A \textbf{dot product} is a way of translating between row and
-      column vectors.  \attn{FILL IN: DISCUSS GENERALIZATION; (DISCUSS ANGLE, TOO)}
-
-      \attn{FILL IN COMPUTATION AND BASES}
-
-      \attn{VISUAL ILLUSTRATION OF HOW CHOICE OF DOT PRODUCT MATTERS}
-
+      %The 
 
     \newpage
     \samsubsection{mathematical language refresher}
