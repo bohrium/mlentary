@@ -1,5 +1,5 @@
 ''' author: sam tenka
-    change: 2022-05-16
+    change: 2022-05-23
     create: 2022-05-16
     descrp: Generate plots for the digit-classification example in the prologue
             page of our 6.86x notes.  
@@ -26,7 +26,8 @@ import numpy as np
 
 #--------------  0.1.0. reading parameters  ------------------------------------
 
-DIG_A, DIG_B = 0, 1
+#DIG_A, DIG_B = 0, 1
+DIG_A, DIG_B = 1, 9
 DIG_SIDE = 28 
 MAX_PIX_VAL = 255
 
@@ -97,11 +98,14 @@ rightink  = lambda x: np.mean(np.mean(x[:,DIG_SIDE//2:]))
 
 #--------------  1.1.2. spatial-spread features  -------------------------------
 
-height = lambda x: (lambda m,v: np.sqrt(v)*2.0/DIG_SIDE)(*std_moments(np.mean(x,axis=0), DIG_COORS)) 
-width  = lambda x: (lambda m,v: np.sqrt(v)*2.0/DIG_SIDE)(*std_moments(np.mean(x,axis=1), DIG_COORS)) 
+height = lambda x: np.std([row for col in range(DIG_SIDE) for row in range(DIG_SIDE) if x[col][row]>0.5]) / (DIG_SIDE/2.0)
+width  = lambda x: np.std([col for col in range(DIG_SIDE) for row in range(DIG_SIDE) if x[col][row]>0.5]) / (DIG_SIDE/2.0)
 
-height_hard= lambda x: (lambda a: float(std_range(a))/DIG_SIDE)(DIG_COORS[np.mean(x,axis=0)>HARD_THRESH]) 
-width_hard = lambda x: (lambda a: float(std_range(a))/DIG_SIDE)(DIG_COORS[np.mean(x,axis=1)>HARD_THRESH]) 
+#height = lambda x: (lambda m,v: np.sqrt(v)*2.0/DIG_SIDE)(*std_moments(np.mean(x,axis=0), DIG_COORS)) 
+#width  = lambda x: (lambda m,v: np.sqrt(v)*2.0/DIG_SIDE)(*std_moments(np.mean(x,axis=1), DIG_COORS)) 
+
+#height_hard= lambda x: (lambda a: float(std_range(a))/DIG_SIDE)(DIG_COORS[np.mean(x,axis=0)>HARD_THRESH]) 
+#width_hard = lambda x: (lambda a: float(std_range(a))/DIG_SIDE)(DIG_COORS[np.mean(x,axis=1)>HARD_THRESH]) 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~  1.2. Featurize Input Data  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,7 +130,7 @@ features = np.array([(inkiness(x),width(x)) for x in trn_x])
 #--------------  3.0.0. plot initialization  -----------------------------------
 
 render = lambda x : 0.95 * (1.0-np.repeat(x[:,:,np.newaxis], 3, axis=2)) 
-
+#
 scatter = np.ones((PLT_SIDE+2,PLT_SIDE+2,3), dtype=np.float32) 
 
 for a in range(10):
@@ -141,79 +145,67 @@ for a in range(10):
 
 scatter[PLT_SIDE,1:PLT_SIDE] = [0.5,0.5,0.5]
 scatter[1:PLT_SIDE,1] = [0.5,0.5,0.5]
-
+#
 make_classifier = lambda a,b : lambda f: DIG_A if a*f[0]+b*f[1] <= 0 else DIG_B 
 
-B   = 200#100#0 #100
-NN  = 800#900#48#900 
+B   = 0 #200#100#0 #100
+NN  = 50#800#900#48#900 
 RES = 200
 best = (float('inf'), (None,None),(None,None))
-for r in range(0,PLT_SIDE,2):
-    if r%20==0:
-        print(r)
-    dc = 1 if abs(r-PLT_SIDE/2) < 15 else 2 if abs(r-PLT_SIDE/2) < 30 else 4  
+
+r=0
+while r<PLT_SIDE:
+    if r%20==0: print(r)
+    dr = 1 if abs(r-PLT_SIDE/2) < 30 else 2 if abs(r-PLT_SIDE/2) < 60 else 4  
+    dc = 1 if abs(r-PLT_SIDE/2) < 30 else 2 if abs(r-PLT_SIDE/2) < 60 else 2  
     for c in range(0,PLT_SIDE,dc):
-        a = int(RES*(1.0-r/float(PLT_SIDE)))-RES//2
+        a = int(RES*((PLT_SIDE-r)/float(PLT_SIDE)))-RES//2
         b = int(RES*(c/float(PLT_SIDE)))-RES//2
-        ## sum, filter, map
-        #err = sum((1 for y,f in zip(trn_y[B:B+NN], features[B:B+NN]) if ((a*f[0]+b*f[1]<=0 and y!=DIG_A) or (a*f[0]+b*f[1]>0 and y!=DIG_B))))
         err = sum((1 for y,f in zip(trn_y[B:B+NN], features[B:B+NN]) if (y!=make_classifier(a,b)(f))))
         err = float(err)/NN
         if err<=best[0]:
             best = (err,(r,c),(a,b))
         color = [0.6,0.5,0.4] # reddish gray
-        scatter[r+1:r+3,c+1:c+1+dc] += err * (np.array(color)-scatter[r+1:r+3,c+1:c+1+dc]) 
+        scatter[r+1:r+1+dr,c+1:c+1+dc] += err * (np.array(color)-scatter[r+1:r+1+dr,c+1:c+1+dc]) 
 
-        if err < 0.1  :
-            color = [0.0,1.0,0.0] # bright green
-            scatter[r+1:r+3,c+1:c+1+dc] += 0.3 * (np.array(color)-scatter[r+1:r+3,c+1:c+1+dc]) 
+        #if err < 0.2  :
+        #    color = [0.0,1.0,0.0] # bright green
+        #    scatter[r+1:r+3,c+1:c+1+dc] += 0.3 * (np.array(color)-scatter[r+1:r+3,c+1:c+1+dc]) 
+    r += dr
 
 #r,c = best[1]
-#for r,c in ((100+20,100+6),(100+72,100+96)):
-for r,c in ((100+20,100+6),):
+#for r,c in ((100-80,101-20),(100-92,101-22),(100-80,101-40),(100+30,101+30)):
+#for r,c in ((100-80,101-20),                (100-80,101-40),(100+30,101+30)):
+for r,c in ((100-80,101-20),(100-92,101-22)                                ):
     scatter[r+1-2      ,c+1-2:c+1+3] += 0.5 * ( np.array([0.0,0.0,0.0]) - scatter[r+1-2      ,c+1-2:c+1+3] )
     scatter[      r+1+2,c+1-2:c+1+3] += 0.5 * ( np.array([0.0,0.0,0.0]) - scatter[      r+1+2,c+1-2:c+1+3] )
     scatter[r+1-2:r+1+3,c+1-2      ] += 0.5 * ( np.array([0.0,0.0,0.0]) - scatter[r+1-2:r+1+3,c+1-2      ] )
     scatter[r+1-2:r+1+3,      c+1+2] += 0.5 * ( np.array([0.0,0.0,0.0]) - scatter[r+1-2:r+1+3,      c+1+2] )
+scatter[100-2:100+3,101] = 0
+scatter[100,101-2:101+3] = 0
 print(best)
-#plt.imsave('train_scat.png', scatter) 
-plt.imsave('test_scat.png', scatter) 
+##plt.imsave('train-scat.png', scatter) 
+#plt.imsave('test-scat.png', scatter) 
 
+##curve = lambda y,x: float(10.0*(0.270* (1.0 - 56*(x-0.7625)**2 - 0.1*(y-1)**2) - (y-0.5*x)-0.5*0.7625)) 
+##
+##a,b = 15, 15    
+##for r in range(PLT_SIDE):
+##    for c in range(PLT_SIDE):
+##        f0, f1 = (PLT_SIDE-1-r)/float(PLT_SIDE), c/float(PLT_SIDE)
+##        dec = curve(f0,f1)
+##        opa = 0.1 * np.exp(-0.5*dec*dec)  
+##        color = [0.0,0.5,0.5] if dec<=0 else [1.0,0.0, 0.0]
+##        scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
+##        if dec*dec < (a*a+b*b) * (0.75*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)):
+##            color = [0.0,0.0,0.0]
+##            opa = 0.5 * np.exp(-dec*dec/(0.30*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)))
+##            scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
 
-curve = lambda y,x: float(10.0*(0.270* (1.0 - 56*(x-0.7625)**2 - 0.1*(y-1)**2) - (y-0.5*x)-0.5*0.7625)) 
-
-#a,b = 72,-96   
+#a,b = 92, -22 
 #for r in range(PLT_SIDE):
 #    for c in range(PLT_SIDE):
-#        f0, f1 = 1.0-r/float(PLT_SIDE), c/float(PLT_SIDE)
-#        dec = float(a*f0+b*f1) 
-#        opa = 0.2 * np.exp(-0.5*dec*dec)  
-#        color = [0.0,0.5,0.5] if dec<=0 else [1.0,0.0, 0.0]
-#        scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
-#        if dec*dec < (a*a+b*b) * (0.75*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)):
-#            color = [0.0,0.0,0.0]
-#            opa = 0.5 * np.exp(-dec*dec/(0.30*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)))
-#            scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
-#
-#
-#a,b = 15, 15    
-#for r in range(PLT_SIDE):
-#    for c in range(PLT_SIDE):
-#        f0, f1 = 1.0-r/float(PLT_SIDE), c/float(PLT_SIDE)
-#        dec = curve(f0,f1)
-#        opa = 0.1 * np.exp(-0.5*dec*dec)  
-#        color = [0.0,0.5,0.5] if dec<=0 else [1.0,0.0, 0.0]
-#        scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
-#        if dec*dec < (a*a+b*b) * (0.75*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)):
-#            color = [0.0,0.0,0.0]
-#            opa = 0.5 * np.exp(-dec*dec/(0.30*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)))
-#            scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
-
-
-#a,b = -20, 6  
-#for r in range(PLT_SIDE):
-#    for c in range(PLT_SIDE):
-#        f0, f1 = 1.0-r/float(PLT_SIDE), c/float(PLT_SIDE)
+#        f0, f1 = (PLT_SIDE-1-r)/float(PLT_SIDE), c/float(PLT_SIDE)
 #        dec = a*f0+b*f1 
 #        opa = 0.2 * np.exp(-0.5*dec*dec)  
 #        color = [0.0,0.5,0.5] if dec<=0 else [1.0,0.0, 0.0]
@@ -223,10 +215,49 @@ curve = lambda y,x: float(10.0*(0.270* (1.0 - 56*(x-0.7625)**2 - 0.1*(y-1)**2) -
 #            opa = 0.5 * np.exp(-dec*dec/(0.30*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)))
 #            scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
 #
+#a,b = 80,-20   
+#for r in range(PLT_SIDE):
+#    for c in range(PLT_SIDE):
+#        f0, f1 = (PLT_SIDE-1-r)/float(PLT_SIDE), c/float(PLT_SIDE)
+#        dec = float(a*f0+b*f1) 
+#        opa = 0.2 * np.exp(-0.5*dec*dec)  
+#        color = [0.0,0.5,0.5] if dec<=0 else [1.0,0.0, 0.0]
+#        scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
+#        if dec*dec < (a*a+b*b) * (0.75*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)):
+#            color = [0.0,0.0,0.0]
+#            opa = 0.5 * np.exp(-dec*dec/(0.30*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)))
+#            scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
+
+#a,b = 80, -40
+#for r in range(PLT_SIDE):
+#    for c in range(PLT_SIDE):
+#        f0, f1 = (PLT_SIDE-1-r)/float(PLT_SIDE), c/float(PLT_SIDE)
+#        dec = a*f0+b*f1 
+#        opa = 0.2 * np.exp(-0.5*dec*dec)  
+#        color = [0.0,0.5,0.5] if dec<=0 else [1.0,0.0, 0.0]
+#        scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
+#        if dec*dec < (a*a+b*b) * (0.75*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)):
+#            color = [0.0,0.0,0.0]
+#            opa = 0.5 * np.exp(-dec*dec/(0.30*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)))
+#            scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
 #
-#B  =200 #100  
-#N  =800 #1900 
-#OF =1.00#0.50
+#a,b = -30, 30
+#for r in range(PLT_SIDE):
+#    for c in range(PLT_SIDE):
+#        f0, f1 = (PLT_SIDE-1-r)/float(PLT_SIDE), c/float(PLT_SIDE)
+#        dec = a*f0+b*f1 
+#        opa = 0.2 * np.exp(-0.5*dec*dec)  
+#        color = [0.0,0.5,0.5] if dec<=0 else [1.0,0.0, 0.0]
+#        scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
+#        if dec*dec < (a*a+b*b) * (0.75*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)):
+#            color = [0.0,0.0,0.0]
+#            opa = 0.5 * np.exp(-dec*dec/(0.30*float(a*a+b*b)/(PLT_SIDE*PLT_SIDE)))
+#            scatter[r+1,c+1] += opa * (np.array(color)-scatter[r+1,c+1]) 
+
+
+#B  = 0 #200 # 0 #200 #100  
+#N  =25 #800 #25 #800 #1900 
+#OF =1.0#0.50#1.0#1.00#0.50
 #for i in range(B,B+N):
 #    r = 1+PLT_SIDE-1-int(PLT_SIDE * min(1.0, 2.0 * inkiness (trn_x[i])))
 #    c = 1+           int(PLT_SIDE * min(1.0, 2.0 * width (trn_x[i])))  # TODO: get from FEATURES
@@ -240,14 +271,28 @@ curve = lambda y,x: float(10.0*(0.270* (1.0 - 56*(x-0.7625)**2 - 0.1*(y-1)**2) -
 #           if ((curve(2*f[0],2*f[1])<=0 and y!=DIG_A) or
 #               (curve(2*f[0],2*f[1])> 0 and y!=DIG_B))))
 #print(float(err)/N)
-#
+
+B=200
+N=800
+err = sum((1 for y,f in zip(trn_y[B:B+N], features[B:B+N])
+           if ((13*f[0]-3*f[1])<=0 and y!=DIG_A or
+               (13*f[0]-3*f[1])> 0 and y!=DIG_B)))
+print(float(err)/N)
+
+#plt.imsave('train-plain.png', scatter) 
+#plt.imsave('test-plain.png', scatter) 
+#plt.imsave('train.png', scatter) 
 #plt.imsave('test.png', scatter) 
-##plt.imsave('train.png', scatter) 
-#
+
+#for i in range(24):
+#    plt.imsave('mnist-trn-{:02d}.png'.format(i), render(trn_x[i])) 
+
 #counts = [0 for _ in range(10)]
 #for i in range(len(trn_y)):
 #    if counts[DIG_A]==3 and counts[DIG_B]==3: break
 #    if counts[trn_y[i]]==3: continue
 #    plt.imsave('mnist-trn-{:02d}.png'.format(sum(counts)), render(trn_x[i])) 
 #    counts[trn_y[i]] += 1
+#for i in range(20):
+#    plt.imsave('mnist-trn-{:02d}.png'.format(i), render(trn_x[i])) 
 #print(trn_y)

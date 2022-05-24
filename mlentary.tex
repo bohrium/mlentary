@@ -1,5 +1,5 @@
 % author:   sam tenka
-% change:   2022-05-18
+% change:   2022-05-23
 % create:   2022-05-11
 
 %==============================================================================
@@ -7,7 +7,7 @@
 %==============================================================================
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%~~~~~~~~~~~~~  0.0. About and Beyond this Exposition  ~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.0. About this Exposition  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 %---------------------  0.0.0. page geometry  ---------------------------------
 \documentclass[11pt, justified]{tufte-book}
@@ -54,9 +54,7 @@
     }$}}}%
 }
 
-
-
-%\newcommand{\note}[1]{{\blu \textsf{#1}}}
+\newcommand{\note}[1]{{\blu \textsf{#1}}}
 \newcommand{\attn}[1]{{\red \textsf{#1}}}
 
 %---------------------  0.1.0. tidbit headers  --------------------------------
@@ -200,8 +198,8 @@
       \begin{marginfigure}
         \centering
         \vspace{+0.6cm}
-        \par\noindent\includegraphics[width=0.8\textwidth]{necker}
-        %\includegraphics[width=0.3\textwidth]{face-vase}
+        \par\noindent\includegraphics[width=0.8\textwidth]{figures/necker}
+        %\includegraphics[width=0.3\textwidth]{figures/face-vase}
         \vspace{-0.1cm}
         %\caption{Cube}
       \end{marginfigure}
@@ -221,7 +219,7 @@
 
         \begin{marginfigure}
           \vspace{+0.1cm}
-          \par\noindent\includegraphics[width=\textwidth]{supervised}\\
+          \par\noindent\includegraphics[width=\textwidth]{figures/supervised}\\
           We learn to predict poison levels of mushrooms from examples.  So we
             take a table of ``training'' examples as input and producing a
             ``pattern'' as output.  We evaluate the pattern on ``testing''
@@ -339,23 +337,23 @@
           Six example $(x,y)$s.  An $x$'s \emph{darkness} is its average
           pixel darkness; its \emph{width} is the stddev column index weighted
           by column darkness.  We normalize both to have max value $1.0$:\\ 
-          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-00}\\\hspace{-0.26cm}\red{$1$}\end{tabular}%
-          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-01}\\\hspace{-0.26cm}\red{$1$}\end{tabular}%
-          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-02}\\\hspace{-0.26cm}\cya{$0$}\end{tabular}%
-          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-01}\\\hspace{-0.26cm}\red{$1$}\end{tabular}%
-          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-04}\\\hspace{-0.26cm}\cya{$0$}\end{tabular}%
-          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{mnist-trn-05}\\\hspace{-0.26cm}\cya{$0$}\end{tabular}\\ 
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{example-mnist/mnist-trn-00}\\\hspace{-0.26cm}\red{$1$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{example-mnist/mnist-trn-01}\\\hspace{-0.26cm}\red{$1$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{example-mnist/mnist-trn-02}\\\hspace{-0.26cm}\cya{$0$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{example-mnist/mnist-trn-01}\\\hspace{-0.26cm}\red{$1$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{example-mnist/mnist-trn-04}\\\hspace{-0.26cm}\cya{$0$}\end{tabular}%
+          \begin{tabular}{c}\hspace{-0.26cm}\includegraphics[width=0.14\textwidth]{example-mnist/mnist-trn-05}\\\hspace{-0.26cm}\cya{$0$}\end{tabular}\\ 
           %
           %%We name the four plots below as $\offour{0},\offour{1},\offour{2},\offour{3}$. 
           %
-          \includegraphics[width=0.48\textwidth]{train.png}%
+          \includegraphics[width=0.48\textwidth]{example-mnist/train.png}%
           \hspace{0.03\textwidth}%
-          \includegraphics[width=0.48\textwidth]{train-scat.png}\\
+          \includegraphics[width=0.48\textwidth]{example-mnist/train-scat.png}\\
           %
           %
-          \includegraphics[width=0.48\textwidth]{test.png}%
+          \includegraphics[width=0.48\textwidth]{example-mnist/test.png}%
           \hspace{0.03\textwidth}%
-          \includegraphics[width=0.48\textwidth]{test-scat.png}
+          \includegraphics[width=0.48\textwidth]{example-mnist/test-scat.png}
           %
           Above: $3$ hypotheses classify $x$s in the darkness-width plane
           ($\offour{0}$).  The $(a,b)$ plane ($\offour{1}$) parameterizes
@@ -1307,7 +1305,7 @@
         \end{lem}
         \begin{figure}[h]
             \centering
-            \includegraphics[height=4cm, clip]{chernoff}
+            \includegraphics[height=4cm, clip]{figures/chernoff}
             \caption{{
                 We sample points uniformly at random on $N$
                 sticks, each with three parts: \textbf{green}

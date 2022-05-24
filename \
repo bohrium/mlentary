@@ -1,0 +1,721 @@
+% author:   sam tenka
+% change:   2022-05-23
+% create:   2022-05-11
+
+%==============================================================================
+%====  0.  DOCUMENT SETTINGS  ================================================
+%==============================================================================
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.0. About this Exposition  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%---------------------  0.0.0. page geometry  ---------------------------------
+\documentclass[11pt, justified]{tufte-book}
+\geometry{
+  left           = 0.90in, % left margin
+  textwidth      = 4.95in, % main text block
+  marginparsep   = 0.15in, % gutter between main text block and margin notes
+  marginparwidth = 2.30in, % width of margin notes
+                 % 0.20in  % width from margin to edge
+}
+
+%---------------------  0.0.1. math packages  ---------------------------------
+\newcommand\hmmax{0} % to allow for more fonts 
+\newcommand\bmmax{0} % to allow for more fonts
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{bm}
+\usepackage{euler}
+
+\usepackage{array}   % for \newcolumntype macro
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\newcolumntype{C}{>{$}c<{$}} % math-mode version of "c" column type
+\newcolumntype{R}{>{$}r<{$}} % math-mode version of "r" column type
+
+%---------------------  0.0.2. graphics packages  -----------------------------
+\usepackage{graphicx, xcolor}
+\usepackage{float, capt-of}
+
+%---------------------  0.0.3. packages for fancy text  -----------------------
+\usepackage{enumitem}\setlist{nosep}
+\usepackage{listings}
+\usepackage{xstring}
+\usepackage{fontawesome5}
+
+%---------------------  0.043. colors  ----------------------------------------
+\definecolor{mblu}{rgb}{0.05, 0.35, 0.70} \newcommand{\blu}{\color{mblu}}
+\definecolor{mbre}{rgb}{0.30, 0.45, 0.60} \newcommand{\bre}{\color{mbre}}
+\definecolor{mbro}{rgb}{0.60, 0.05, 0.05} \newcommand{\bro}{\color{mbro}}
+\definecolor{mcya}{rgb}{0.10, 0.45, 0.45} \newcommand{\cya}{\color{mcya}}
+\definecolor{mgre}{rgb}{0.55, 0.55, 0.50} \newcommand{\gre}{\color{mgre}}
+\definecolor{mgrn}{rgb}{0.15, 0.65, 0.05} \newcommand{\grn}{\color{mgrn}}
+\definecolor{mred}{rgb}{0.90, 0.05, 0.05} \newcommand{\red}{\color{mred}}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.1. Headers and References  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%---------------------  0.1.0. intra-document references  ---------------------
+\newcommand{\offour}[1]{
+    {\tiny \raisebox{0.04cm}{\scalebox{0.9}{$\substack{
+        \IfSubStr{#1}{0}{{\blacksquare}}{\square}   
+        \IfSubStr{#1}{1}{{\blacksquare}}{\square} \\ 
+        \IfSubStr{#1}{2}{{\blacksquare}}{\square}   
+        \IfSubStr{#1}{3}{{\blacksquare}}{\square}   
+    }$}}}%
+}
+
+\newcommand{\offourline}[1]{
+    {\tiny \raisebox{0.04cm}{\scalebox{0.9}{$\substack{
+        \IfSubStr{#1}{0}{{\blacksquare}}{\square}   
+        \IfSubStr{#1}{1}{{\blacksquare}}{\square}
+        \IfSubStr{#1}{2}{{\blacksquare}}{\square}   
+        \IfSubStr{#1}{3}{{\blacksquare}}{\square}   
+    }$}}}%
+}
+\newcommand{\notesam}[1]{{\blu \textsf{#1}}}
+\newcommand{\attn}[1]{{\bro \textsf{#1}}}
+\newcommand{\attnsam}[1]{{\red \textsf{#1}}}
+
+\newcommand{\blarr}{\hspace{-0.15cm}${\bro \leftarrow}\,$}
+\newcommand{\bcirc}{${\bro ^\circ}$}
+
+\newcounter{footprintssofar}
+\setcounter{footprintssofar}{90}
+\newcommand{\plainfootprint}{{\bro \rotatebox{\value{footprintssofar}}{\faIcon{shoe-prints}}}\setcounter{footprintssofar}{\value{footprintssofar}+30} }
+\newcommand{\footprint}{\marginnote{\plainfootprint} }
+
+%---------------------  0.1.1. table of contents helpers  ---------------------
+\newcommand{\phdot}{\phantom{.}}
+
+%---------------------  0.1.2. section headers  -------------------------------
+\newcommand{\samtitle} [1]{
+  \par\noindent{\Huge \sf \blu #1}
+  \vspace{0.4cm}
+}
+
+\newcommand{\samquote} [2]{
+    \marginnote[-0.4cm]{\begin{flushright}
+    \scriptsize
+        \gre {\it #1} \\ --- #2
+    \end{flushright}}
+}
+
+\newcommand{\samsection} [1]{
+  \vspace{0.5cm}
+  \par\noindent{\LARGE \sf \blu #1}
+  \vspace{0.1cm}\par
+}
+
+\newcommand{\samsubsection}[1]{
+  \vspace{0.3cm}
+  \par\noindent{\Large \sf \bre #1}
+  \vspace{0.1cm}\par
+}
+
+\newcommand{\samsubsubsection}[1]{
+   \vspace{0.1cm}
+   \par\noindent{\hspace{-2cm}\normalsize \sc \gre #1} ---
+}
+
+%---------------------  0.1.3. clear the bibliography's header  ---------------
+\usepackage{etoolbox}
+\patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.2. Math Symbols and Blocks  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%---------------------  0.2.0. general math operators  ------------------------
+\newcommand{\scirc}{\mathrel{\mathsmaller{\mathsmaller{\mathsmaller{\circ}}}}}
+\newcommand{\cmop}[2]{{(#1\!\to\!#2)}}
+
+%---------------------  0.2.1. probability symbols  ---------------------------
+\newcommand{\KL}{\text{KL}}
+\newcommand{\EN}{\text{H}}
+\newcommand{\note}[1]{{\blu \textsf{#1}}}
+
+%---------------------  0.2.2. losses averaged in various ways  ---------------
+\newcommand{\Ein}  {\text{trn}_{\sS}}
+\newcommand{\Einb} {\text{trn}_{\check\sS}}
+\newcommand{\Einc} {\text{trn}_{\sS\sqcup \check\sS}}
+\newcommand{\Egap} {\text{gap}_{\sS}}
+\newcommand{\Eout} {\text{tst}}
+
+%---------------------  0.2.3. double-struck and caligraphic upper letters  ---
+\newcommand{\Aa}{\mathbb{A}}\newcommand{\aA}{\mathcal{A}}
+\newcommand{\Bb}{\mathbb{B}}\newcommand{\bB}{\mathcal{B}}
+\newcommand{\Cc}{\mathbb{C}}\newcommand{\cC}{\mathcal{C}}
+\newcommand{\Dd}{\mathbb{D}}\newcommand{\dD}{\mathcal{D}}
+\newcommand{\Ee}{\mathbb{E}}\newcommand{\eE}{\mathcal{E}}
+\newcommand{\Ff}{\mathbb{F}}\newcommand{\fF}{\mathcal{F}}
+\newcommand{\Gg}{\mathbb{G}}\newcommand{\gG}{\mathcal{G}}
+\newcommand{\Hh}{\mathbb{H}}\newcommand{\hH}{\mathcal{H}}
+\newcommand{\Ii}{\mathbb{I}}\newcommand{\iI}{\mathcal{I}}
+\newcommand{\Jj}{\mathbb{J}}\newcommand{\jJ}{\mathcal{J}}
+\newcommand{\Kk}{\mathbb{K}}\newcommand{\kK}{\mathcal{K}}
+\newcommand{\Ll}{\mathbb{L}}\newcommand{\lL}{\mathcal{L}}
+\newcommand{\Mm}{\mathbb{M}}\newcommand{\mM}{\mathcal{M}}
+\newcommand{\Nn}{\mathbb{N}}\newcommand{\nN}{\mathcal{N}}
+\newcommand{\Oo}{\mathbb{O}}\newcommand{\oO}{\mathcal{O}}
+\newcommand{\Pp}{\mathbb{P}}\newcommand{\pP}{\mathcal{P}}
+\newcommand{\Qq}{\mathbb{Q}}\newcommand{\qQ}{\mathcal{Q}}
+\newcommand{\Rr}{\mathbb{R}}\newcommand{\rR}{\mathcal{R}}
+\newcommand{\Ss}{\mathbb{S}}\newcommand{\sS}{\mathcal{S}}
+\newcommand{\Tt}{\mathbb{T}}\newcommand{\tT}{\mathcal{T}}
+\newcommand{\Uu}{\mathbb{U}}\newcommand{\uU}{\mathcal{U}}
+\newcommand{\Vv}{\mathbb{V}}\newcommand{\vV}{\mathcal{V}}
+\newcommand{\Ww}{\mathbb{W}}\newcommand{\wW}{\mathcal{W}}
+\newcommand{\Xx}{\mathbb{X}}\newcommand{\xX}{\mathcal{X}}
+\newcommand{\Yy}{\mathbb{Y}}\newcommand{\yY}{\mathcal{Y}}
+\newcommand{\Zz}{\mathbb{Z}}\newcommand{\zZ}{\mathcal{Z}}
+
+%---------------------  0.2.4. sans serif and frak lower letters  -------------
+\newcommand{\sfa}{\mathsf{a}}\newcommand{\fra}{\mathcal{a}}
+\newcommand{\sfb}{\mathsf{b}}\newcommand{\frb}{\mathcal{b}}
+\newcommand{\sfc}{\mathsf{c}}\newcommand{\frc}{\mathcal{c}}
+\newcommand{\sfd}{\mathsf{d}}\newcommand{\frd}{\mathcal{d}}
+\newcommand{\sfe}{\mathsf{e}}\newcommand{\fre}{\mathcal{e}}
+\newcommand{\sff}{\mathsf{f}}\newcommand{\frf}{\mathcal{f}}
+\newcommand{\sfg}{\mathsf{g}}\newcommand{\frg}{\mathcal{g}}
+\newcommand{\sfh}{\mathsf{h}}\newcommand{\frh}{\mathcal{h}}
+\newcommand{\sfi}{\mathsf{i}}\newcommand{\fri}{\mathcal{i}}
+\newcommand{\sfj}{\mathsf{j}}\newcommand{\frj}{\mathcal{j}}
+\newcommand{\sfk}{\mathsf{k}}\newcommand{\frk}{\mathcal{k}}
+\newcommand{\sfl}{\mathsf{l}}\newcommand{\frl}{\mathcal{l}}
+\newcommand{\sfm}{\mathsf{m}}\newcommand{\frm}{\mathcal{m}}
+\newcommand{\sfn}{\mathsf{n}}\newcommand{\frn}{\mathcal{n}}
+\newcommand{\sfo}{\mathsf{o}}\newcommand{\fro}{\mathcal{o}}
+\newcommand{\sfp}{\mathsf{p}}\newcommand{\frp}{\mathcal{p}}
+\newcommand{\sfq}{\mathsf{q}}\newcommand{\frq}{\mathcal{q}}
+\newcommand{\sfr}{\mathsf{r}}\newcommand{\frr}{\mathcal{r}}
+\newcommand{\sfs}{\mathsf{s}}\newcommand{\frs}{\mathcal{s}}
+\newcommand{\sft}{\mathsf{t}}\newcommand{\frt}{\mathcal{t}}
+\newcommand{\sfu}{\mathsf{u}}\newcommand{\fru}{\mathcal{u}}
+\newcommand{\sfv}{\mathsf{v}}\newcommand{\frv}{\mathcal{v}}
+\newcommand{\sfw}{\mathsf{w}}\newcommand{\frw}{\mathcal{w}}
+\newcommand{\sfx}{\mathsf{x}}\newcommand{\frx}{\mathcal{x}}
+\newcommand{\sfy}{\mathsf{y}}\newcommand{\fry}{\mathcal{y}}
+\newcommand{\sfz}{\mathsf{z}}\newcommand{\frz}{\mathcal{z}}
+
+%---------------------  0.2.5. math environments  -----------------------------
+\newtheorem*{qst}{Question}
+\newtheorem*{thm}{Theorem}
+\newtheorem*{lem}{Lemma}
+% ...
+\theoremstyle{definition}
+\newtheorem*{dfn}{Definition}
+
+%==============================================================================
+%=====  1.  PROLOGUE  =========================================================
+%==============================================================================
+
+\begin{document}
+\samtitle{recitation 01 (optional 6.86x notes)}
+
+      \marginnote{%
+        %These notes overlap with what we'll cover in recitation.  But
+        Recitation will have more coding practice and much less detail than
+        these notes.  We'll skip whole sections of these notes during
+        recitation.
+        %
+        Footprints --- \plainfootprint --- in these notes indicate roughly
+        which points we will linger on during recitation.  Each footprint
+        represents perhaps three to seven minutes of recitation time.  
+        %
+        %A recitation might have eighteen footprints.
+      }
+
+      \attn{You do not need to read these notes at all} to get an A
+      in this course; conversely, \attn{you may not cite these notes} when
+      solving homework or exams.
+       
+  \samsection{A. Prologue}
+
+    \samsubsection{bird's eye view}
+ 
+      \samsubsubsection{kinds of learning}
+        How do we communicate patterns of desired behavior?  We can teach:\footprint
+        \begin{description}
+          \item[\textbf{by instruction}:  ]  ``to tell whether a mushroom is poisonous, first look at its gills...'' 
+          \item[\textbf{by example}:      ]  ``here are six poisonous fungi; here, six safe ones.  see a pattern?''
+          \item[\textbf{by reinforcement}:]  ``eat foraged mushrooms for a month; learn from getting sick.''
+        \end{description}
+        %
+        Machine learning is the art of programming computers to learn from such
+        sources.  We'll focus on the most important case: learning from
+        examples.\bcirc\marginnote{%
+          \blarr In Unit 5 of 6.86x, we'll see that learning by example is key to
+          the other modes of learning.
+        }
+
+      \samsubsubsection{from examples to predictions}
+        For us, a pattern of desired behavior is a function that for each given
+        situation/prompt returns a favorable action/answer.\footprint
+        %
+        Our goal is to write a program that, from a list of $N$ examples of
+        prompts and matching answers, determines an underlying pattern.  We
+        consider our program a success if this pattern accurately predicts
+        answers corresponding to new, unseen prompts.
+        %
+        We often define our program as a search, over some set $\hH$ of
+        candidate patterns, to minimize some notion of ``discrepancy from the
+        example data''.\footprint
+
+        \begin{figure}[h]
+          \vspace{-0.5cm}
+          \par\noindent\includegraphics[width=\textwidth]{figures/supervised}\\
+          \caption{%
+            A program that learns to predict mushrooms' poison levels:
+            %
+            first takes a list of labeled mushrooms as input (blue blob);
+            searches
+            through candidate patterns (here, the wiggly curves labeled
+            \texttt{lightness of gills}, \texttt{habitat darkness}, and
+            \texttt{cap redness}); and returns the pattern that best fits the
+            examples.
+            %
+            Evaluating this pattern on new mushrooms, we predict their poison
+            levels (red blob). 
+            %
+            \par The three bold black arrows show the flow of data from
+            training examples to a learned pattern; and from that pattern
+            together with testing prompts to predictions.  
+            %
+            Part of specifying the learning program is specifying the set of candidate patterns to consider.
+          }
+          \vspace{-0.5cm}
+        \end{figure}
+
+        To save ink, say that $\xX$ is the set of possible prompts; $\yY$, of
+        possible answers.\bcirc\marginnote{%
+          \blarr If we like, we can now summarize the data flow in symbols.  A
+          pattern is a function of type $\xX\to\yY$.  And we can model the
+          examples from which our program learns as a list of type $(\xX\times
+          \yY)^N$.  Then a program that learns from examples has type:
+          $$
+            \lL : (\xX\times \yY)^N \to (\xX\to \yY)
+          $$
+          Once we allow uncertainty by letting patterns map to \emph{probability
+          distributions} over answers, the type will change to:
+          $$
+            \lL : (\xX\times \yY)^N \to (\xX\to \text{DistributionsOn}(\yY))
+          $$
+        }
+        In the mushrooms example, $\xX$ contains all
+        conceivable mushrooms and $\yY$ contains all conceivable poison
+        levels (perhaps all the non-negative real numbers).
+
+      \samsubsubsection{supervised learning}
+        We'll soon allow uncertainty by letting patterns map to \emph{probability
+        distributions} over answers.
+        %
+        Even if the prompt is always the same --- say, ``produce a beautiful
+        melody'', we may seek to understand the complicated distribution over
+        answers.  We might regard our program a success if it can
+        generate a variety of good answers.
+        %
+        So-called \textbf{unsupervised learning} focuses in that way on output
+        structure.  By contrast, \textbf{supervised learning} (our subject in
+        Unit 1), focuses on the input-output relation; it's interesting when
+        the space of prompts is large.\footprint
+        %
+
+    \newpage
+    \samsubsection{a tiny example: handwritten digit classification}
+      \samsubsubsection{meeting the data}
+        $\xX = \{\text{grayscale~}28\!\times\!28\text{-pixel images}\}$;
+        $\yY=\{{\cya{1}},{\red{9}}\}$.  Each datum $(x,y)$ arises as follows:
+        we randomly choose a digit $y\in \yY$, ask a human to write that digit
+        in pen, and then photograph their writing to produce $x\in\xX$.\footprint
+        %
+
+        \vspace{-0.25cm}
+        \begin{figure}
+            \centering
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-00}\\$\red{9}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-10}\\$\cya{1}$\end{tabular}%
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-01}\\$\cya{1}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-11}\\$\red{9}$\end{tabular}%
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-02}\\$\red{9}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-12}\\$\cya{1}$\end{tabular}%
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-03}\\$\red{9}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-13}\\$\cya{1}$\end{tabular}%
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-04}\\$\cya{1}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-14}\\$\red{9}$\end{tabular}%
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-05}\\$\red{9}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-15}\\$\red{9}$\end{tabular}%
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-06}\\$\red{9}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-16}\\$\red{9}$\end{tabular}%
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-07}\\$\red{9}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-17}\\$\cya{1}$\end{tabular}%
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-08}\\$\cya{1}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-18}\\$\red{9}$\end{tabular}%
+          \begin{tabular}{c}\includegraphics[width=0.75cm]{example-mnist/mnist-trn-09}\\$\red{9}$\\\includegraphics[width=0.75cm]{example-mnist/mnist-trn-19}\\$\cya{1}$\end{tabular}%
+          \caption{
+            Twenty example pairs.  Each photo $x$ is a $28\times 28$ grid of
+            numbers representing pixel intensities.  The light gray background
+            has intensity $0.0$; the blackest pixels, intensity $1.0$.  Below
+            each photo $x$ we display the corresponding label $y$:
+            either $y= {\cya{1}}$ or
+            $y={\red{9}}$.
+            %
+            We'll adhere to this color code throughout this tiny example.
+          }
+        \end{figure}
+
+        \footprint
+        As part of getting to know the data, it's worth taking a moment to
+        think about how we would go about hand-coding a digit classifier.  The
+        challenge is to complete the pseudocode
+        %
+        ``\texttt{if (?)\ then predict y=9 else predict y=1}''.
+        %
+        Well, ${\red{9}}$s tend to have more ink than than ${\cya{1}}$s ---
+        should \texttt{(?)}\ threshold by the photo's darkness?
+        %
+        Or: ${\cya{1}}$s tend to be wider than ${\red{9}}$s --- should 
+        \texttt{(?)}\ threshold by the photo's dark part's width?
+
+        To make this precise, let's define a photo's \emph{darkness} as its
+        average pixel darkness; its \emph{width} as the standard deviation of
+        the column index of its dark pixels.  For convenience let's normalize
+        both width and darkness to have max possible value $1.0$.  Such
+        functions from inputs in $\xX$ to numbers are called
+        \textbf{features}.\footprint
+
+        \begin{lstlisting}[language=Python, basicstyle=\footnotesize\ttfamily]
+          SIDE = 28
+          def darkness(x):
+            return np.mean(np.mean(x))
+          def width(x):
+            return np.std([col for col in range(SIDE)
+                               for row in range(SIDE)
+                               if 0.5 < x[row][col]  ])/(SIDE/2.0) 
+        \end{lstlisting}
+
+        So we can threshold by darkness or by width.  But this isn't very
+        satisfying, since sometimes there are especially dark ${\cya{1}}$s or
+        wide ${\red{9}}$s. 
+        %
+        We thus arrive at the idea of using \emph{both} features: ${\red{9}}$s
+        are darker than ${\cya{1}}$s \emph{even relative to their
+        width}.  So we might write something like
+        \texttt{2*darkness(x)-width(x)>0} for\bcirc\marginnote{%
+          \blarr That factor of
+          $2$ comes from our observation that darkness and tends to be $0.15$
+          while width tends to be around $0.30$.
+        } our condition.
+
+        \begin{lstlisting}[language=Python, basicstyle=\footnotesize\ttfamily]
+          def hand_coded_predict(x):
+            return 9 if 2*darkness(x)-width(x)>0 else 1
+        \end{lstlisting}
+
+        \noindent
+        \attn{Exercise:} {Beyond width and darkness, what features do you think
+        might help us to separate digits $1$ from $9$?
+        How about $0$ from $9$?}\footprint
+
+    %\newpage
+      \samsubsubsection{candidate patterns}
+        We can generalize the hand-coded hypothesis from the previous passage
+        to other coefficients besides $1\cdot \text{width}(x) -
+        2\cdot\text{darkness}(x)$.  We let our set $\hH$ of candidate patterns
+        contain all ``linear hypotheses'' $f_{a,b}$ defined by:\footprint
+        $$
+          f_{a,b}(x) = {\red{9}} \text{~~if~~} a\cdot\text{darkness}(x) + b\cdot\text{width}(x) > 0 \text{~~else~~} {\cya{1}}
+        $$ 
+        Each $f_{a,b}$ makes predictions of $y$s given $x$s.  As we change $a$
+        and $b$, we get different predictors, some more accurate than others.
+
+        \begin{lstlisting}[language=Python, basicstyle=\footnotesize\ttfamily]
+          def predict(x,a,b):
+            return 9 if a*width(x) + b*darkness(x) > 0 else 1
+        \end{lstlisting}
+
+        \noindent
+        \attn{Exercise:} {how do $\offourline{0}$'s $3$ straight lines and
+        $\offourline{1}$'s $3$ marked points correspond?}\footprint
+
+      \samsubsubsection{optimization}
+        Let's write a program $\lL$ that given a list of \emph{training
+        examples} produces a hypothesis in $h \in \hH$ that helps us predict
+        the labels $y$ of yet-unseen photos $x$ (\emph{testing examples}).
+        Insofar as training data is representative of testing data, it's
+        sensible to return a $h\in \hH$ that correctly classifies maximally
+        many training examples.\footprint
+        %
+        To do this, let's make $\lL$ loop over all integer pairs $(a,b)$ in
+        $[-99,+99]$:  %to minimize the number of misclassified training examples. 
+        \begin{lstlisting}[language=Python, basicstyle=\footnotesize\ttfamily]
+          def accuracy_on(examples,a,b):
+            return sum(1.0 for x,y in examples if predict(x,a,b)==y)/len(examples)
+          def best_hypothesis():
+            return max((accuracy_on(training_data, a, b), (a,b))
+                       for a in range(-99,100) 
+                       for b in range(-99,100))
+        \end{lstlisting}
+
+        \begin{figure}[h]
+            \includegraphics[width=0.24\textwidth]{example-mnist/train.png}%
+            \hspace{0.005\textwidth}%
+            \includegraphics[width=0.24\textwidth]{example-mnist/train-scat.png}%
+            \hspace{0.02\textwidth}%
+            \includegraphics[width=0.24\textwidth]{example-mnist/test.png}%
+            \hspace{0.005\textwidth}%
+            \includegraphics[width=0.24\textwidth]{example-mnist/test-scat.png}
+            %
+            \caption{
+              \textbf{Training
+              ($\protect\offourline{01}$) and testing
+              ($\protect\offourline{23}$).}
+              %
+              $3$ hypotheses classify
+              training data in the darkness-width plane ($\protect\offourline{0}$).
+              %
+              Each point in the $(a,b)$ plane ($\protect\offourline{1}$) represents
+              a hypothesis; we shade them by the fraction of training
+              data they misclassify: darker means less accurate.
+              %
+              Panes $\protect\offourline{23}$ show the same for
+              \emph{testing} data.
+              %
+              $\protect\offourline{02}$'s axes range $[0, 0.5]$.
+              $\protect\offourline{13}$'s axes range $[-99,+99]$. 
+            }
+        \end{figure}
+
+
+        When we feed $N=25$ training examples to $\lL$, it produces
+        $(a,b)=(80,-20)$ as a minimizer of training-error.  with $5\%$ of training examples
+        misclassified.\footprint However, the same hypothesis %$(a,b)=(-20,6)$
+        misclassifies a greater fraction --- $8\%$ --- of fresh testing
+        examples.
+
+        \noindent
+        \attn{Exercise:} {visualize $f_{a,b}$'s error on $N=1$ example as a 
+        function of $(a,b)$.}\footprint
+
+      \samsubsubsection{error analysis}
+        We got optimization error
+        $\approx 0$ (albeit by \emph{unscalable brute-force}).  So
+        approximation error $\approx \Ein \approx 5\%$.  Indeed, our straight
+        lines are \emph{too simple}: width and darkness lose useful information
+        and the ``true'' boundary looks curved (see $\offourline{0}$'s
+        curve).\footprint
+        %
+        The testing error $\Eout \approx 8\%$ exceeds $\Ein$: we suffer
+        \emph{generalization error}.
+        %% actually approx error should be measured on the train set, which ain't that bad
+        %
+        In 6.86x we'll address all three italicized issues.
+
+    %\newpage
+    \samsubsection{supervised learning framework}
+      \samsubsubsection{formalism}
+        Draw training examples $\sS : (\xX\times \yY)^N$ %a list of examples
+        from nature's distribution $\dD$ on $\xX\times \yY$.  A pattern
+        $f:\xX\to \yY$ has \textbf{training error}
+        $
+           \Ein(f) = \Pp_{(x,y)\sim \red{\sS}}[f(x)\neq y] 
+        $, an average over examples; and \textbf{testing error}
+        $
+           \Eout(f) = \Pp_{(x,y)\sim \red{\dD}}[f(x)\neq y] 
+        $, an average over nature.  A \emph{learning program} is a function 
+        $
+            \lL : (\xX\times \yY)^N \to (\xX\to \yY)
+        $; we want to design $\lL$ so that it maps typical $\sS$s to $f$s with
+        low $\Eout(f)$.\marginnote{%
+          %  TODO: mention extereme class-imbalance and bayesian *decision* theory 
+        }
+
+      \samsubsubsection{learning error}
+        As in the previous subsection's tiny example,  
+        we often define
+        $\lL$ to roughly
+        minimize $\Ein$ over a
+        set $\hH \subseteq (\xX\to \yY)$ of candidate patterns.  Then $\Eout$
+        decomposes
+        into the failures
+        of
+        $\Ein$ to estimate $\Eout$ (generalization),
+        of
+        $\lL$ to minimize $\Ein$ (optimization), and 
+        of
+        $\hH$ to contain
+        nature's
+        truth (approximation): 
+        \newcommand{\minf}[1]{{\inf}_{\hH}}
+        \begin{align*}
+            \Eout(\lL(\sS)) 
+            =~&\Eout(\lL(\sS))      &-\,\,\,&      \Ein(\lL(\sS)) &~\}~& \text{\textbf{generalization} error} \\
+            +~&\Ein(\lL(\sS))       &-\,\,\,& \minf{\hH}(\Ein(f)) &~\}~& \text{\textbf{optimization} error} \\
+            +~&\minf{\hH}(\Ein(f))  &       &                     &~\}~& \text{\textbf{approximation} error}  
+        \end{align*}
+        These terms are in tension.  For example, as $\hH$ grows, the
+        approx.\ error may decrease while the gen.\ error may
+        increase --- this is the ``\textbf{bias-variance} tradeoff''.
+
+        \noindent
+        \attn{Exercise:} {why is generalization error usually positive?}\footprint
+
+        %In the previous subsection, we got optimization error
+        %$\approx 0$ (albeit by \emph{unscalable brute-force}).  So
+        %approximation error $\approx \Ein \approx 5\%$.  Indeed, our straight
+        %lines are \emph{too simple}: width and darkness lose useful information
+        %and the ``true'' boundary looks curved (see $\offourline{0}$'s
+        %curve).\footprint
+        %%
+        %The testing error $\Eout \approx 8\%$ exceeds $\Ein$: we suffer
+        %\emph{generalization error}.
+        %%% actually approx error should be measured on the train set, which ain't that bad
+        %%
+        %In 6.86x we'll address all three italicized issues.
+
+      \samsubsubsection{workflow: framing}
+        \emph{Framing} is about knowing our data and knowing what problem we
+        want it to help solve.  Framing includes \emph{factorizing} a complex
+        prediction problem into simple classification and regression problems;
+        preparing and \emph{splitting} the consequent example pairs into
+        training, development, and testing sets, and and \emph{visualizing} the
+        training data to weigh our intuitions. 
+
+      \samsubsubsection{workflow: modeling}
+        \emph{Modeling} is about presenting our data in a way that is easy to
+        digest for the computer --- in a way that easily found patterns are
+        intuitively likely to be accurate. 
+        %
+        This is the key stage where we will inject our \emph{domain knowledge}
+        --- that is, our human experience and intuition about which factors
+        are likely to help with prediction.
+        %
+        Modeling includes \emph{featurizing} our inputs and \emph{regularizing}
+
+        by choosing a class of \emph{priors} and symmetries.
+
+      \samsubsubsection{workflow: training}
+        \emph{Training} is about getting the computer to digest the data we've
+        given it.  Under the hood, the computer will try a zillion candidate
+        patterns until it hits upon one that explains the examples relatively
+        well.  Above, we used brute force search; soon we'll learn more
+        efficient approximate algorithms such as \emph{gradient descent}. 
+        Training also involves \emph{model selection}: selecting from several
+        qualitatively different models one that best predicts the development
+        set.
+
+      \samsubsubsection{workflow: harvesting}
+        \emph{Harvesting} is about doing stuff with the pattern the computer
+        settled on after it tried a zillion candidates.  We can derive insights
+        from the pattern itself (which factors ended up being most important?)
+        and we can predict outputs corresponding to fresh inputs.
+        %
+        Qualifying both applications is the pattern's quality.  To assess this,
+        we measure its accuracy on our held-out testing data.
+
+
+        \newpage
+  \samsection{Appendix: Python Programming}
+
+    \samsubsection{Python Basics}
+      \samquote{
+        If I have not seen as far as others, it is because giants were standing
+        on my shoulders.
+      }{hal abelson}
+
+      \samsubsubsection{what's python?}
+        Python is a popular programming language.  Its heart is the
+        \textbf{Python interpreter}, a computer program that takes a plain old
+        text file such as this two-liner ---
+        \begin{lstlisting}[language=Python, basicstyle=\footnotesize\ttfamily]
+          print('hello, world!')
+          print('cows and dogs are fluffy')
+        \end{lstlisting}
+        --- and executes the instructions contained in that text file.  The
+        jargon is that these textual instructions are \textbf{source code}.
+
+        The instructions have to be in a certain, extremely rigid format in
+        order for the interpreter to understand and execute them.  That's why
+        they call it Python a \emph{language}: it has its own rigid grammar
+        and its own limited vocabulary.  If the
+        interpreter encounters incorrectly formatted instructions --- if even a
+        single punctuation mark is missing --- the interpreter will display a
+        bit of text containing the word \texttt{Error} and immediately after
+        abort its mission.\bcirc\marginnote{%
+          \blarr Please be adventurous when learning Python!  It might seem
+          like a catastrophe when you encounter an error and the interpreter
+          `dies'.  But (unless you go out of your way to use special
+          instructions that we won't discuss in class) these errors won't hurt your
+          computer.  There aren't any lasting effects.  If you encounter an
+          error, just modify your instructions to address that error, and run
+          the interpreter again.
+          %
+          Engaging in a fast feedback cycle (\emph{I'll try this... error...
+          okay how about this...  different error... hmm let's think...}) is a
+          good way to learn to program well.
+        }
+
+        We'll use Python in 6.86x to instruct our computer to analyze and learn
+        from data.  The gigantic project of instructing a computer to learn is
+        a bit like teaching a person by mail.  We never see them: we only
+        exchange words back and forth.  They have never seen a horse, and yet
+        we want to teach them to distinguish horses from zebras from donkeys
+        from tapirs from rhinos.  Though severely limited in their vocabulary
+        and their ability to appreciate analogies and similarities, they are
+        extraordinarily meticulous, patient, and efficient. 
+        %
+        That's what programming will be like.
+
+        At this point, you might have several questions.
+        \begin{description}
+          \item[\textbf{Picking up the pen:}] How do I install and use the Python
+               interpreter? 
+          \item[\textbf{Writing sentences:}] What syntax rules must my
+               instructions obey in order for the interpreter to understand
+                that I want it do such-and-such task? 
+          \item[\textbf{Composing essays:}] How do I organize my instructions so as
+               to effectively
+          \item[\textbf{Teaching via mail:}] What instructions make
+               make the computer learn from data?
+        \end{description}
+
+      \samsubsubsection{setup}
+        Beyond the Python
+        interpreter, there is an ecosystem of useful tools: machine learning
+        modules that help us avoid reinventing the wheel; a rainbow of
+        feature-rich IDEs to choose from; and a package manager called
+        \texttt{conda} that eases the dependency-spaghetti hassle often
+        present in installing the right version of stuff.  
+
+        Let's set up Python3.
+
+        I'll assume we're working on Linux
+        (specifically, Ubuntu 20 or related).  If you're on a different Linux
+        or on MacOS, then similar steps should work --- google search to figure
+        out how.  If you're on Windows 10 or higher, then similar steps should
+        work after you set up the ``Linux Subsystem for Windows.''
+
+        \attn{FILL IN: how to run, comments, basic stdIO}
+        \attn{line by line HELLO WORLD; string type}
+        \attn{line by line FAHRENHEIT KELVIN CELSIUS; float and integer types}
+
+      \samsubsubsection{state and control flow}
+        % use-mention distinction; syntax-semantic.s  Asimov ROBOT
+
+        \attn{finite state automata; skip, abort}
+        \attn{variable cube; assignment}
+        \marginnote{%
+          Once you learn how to program, I highly recommend reading Edsger
+          Dijkstra's \emph{A Discipline of Programming}.  That book contains
+          many beautiful viewpoints that made me a better programmer.
+        }
+        %
+        \attn{sequencing}
+        \attn{conditionals} % also mention trivalent CHOICE operator?  
+        \attn{iteratives}
+        \marginnote{%
+          % for-range idiom; break, continue, else in loops 
+        }
+        \attn{nesting, (scope?,) indentation}
+
+    \samsubsection{Structuring Code}
+
+      \samsubsubsection{routines}
+        %\attn{mention SCOPE somewhere (perhaps earlier than this passage?)}
+        \attn{lambdas}
+        \attn{\texttt{def}d functions (ordinary args, return)}
+        \attn{interfaces: (kwargs; None as default return value; sentinels; more)}
+        \attn{code architecture and hygiene}
+
+    \samsubsection{Numpy}
+
+\end{document}
+
