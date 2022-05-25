@@ -15,34 +15,14 @@
 #===============================================================================
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~  0.0. universal constants  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~  0.0. import modules  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#--------------  0.0.0. import modules  ----------------------------------------
-
-from keras.datasets import mnist, fashion_mnist 
+from keras.datasets import mnist, fashion_mnist
 from matplotlib import pyplot as plt                                            
 import numpy as np                                                              
 
-#--------------  0.2.1. colors  ------------------------------------------------
-
-WHITE        = np.array([1.0 ,1.0 ,1.0 ])
-SMOKE        = np.array([ .9 , .9 , .9 ])
-SLATE        = np.array([ .5 , .5 , .5 ])
-SHADE        = np.array([ .1 , .1 , .1 ])
-BLACK        = np.array([ .0 , .0 , .0 ])
-
-RED          = np.array([1.0 , .0 , .0 ])
-BROWN        = np.array([0.5 ,0.5 , .0 ])
-GREEN        = np.array([ .0 ,1.0 , .0 ])
-CYAN         = np.array([ .0 , .5 , .5 ])
-BLUE         = np.array([ .0 , .0 ,1.0 ])
-MAGENTA      = np.array([ .5 , .0 , .5 ])
-
-def overlay_color(background, foreground, foreground_opacity=1.0):
-    background += foreground_opacity * (foreground - background)
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~  0.1. global parameters  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~  0.1. global free parameters  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #--------------  0.1.0. reading parameters  ------------------------------------
 
@@ -62,13 +42,9 @@ PLT_SIDE = 320
 MARG     = 2
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~~~~~~  0.2. global initialization and computations  ~~~~~~~~~~~~~~~~~~~~~~~~
-
-#--------------  0.2.0. parameterize randomness for replicability  -------------
+#~~~~~~~~  0.2. global initialization  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 np.random.seed(0)
-
-#--------------  0.2.1. rendering geometry  ------------------------------------
 
 DIG_COORS = np.arange(DIG_SIDE)
 
@@ -142,8 +118,6 @@ features = np.array([(darkness(x),width(x)) for x in trn_x])
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~  2.0. Fit Linear Classifiers  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#make_classifier = lambda a,b : lambda f: DIG_A if a*f[0]+b*f[1] <= 0 else DIG_B 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~  2.1. Fit Gaussian Generative Classifiers  ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -222,11 +196,13 @@ while r<PLT_SIDE:
             print(err)
         if err<=best[0]:
             best = (err,(r,c),(a,b))
-        color = SLATE #[0.6,0.5,0.4] # reddish gray
-        overlay_color(scatter[r+1:r+1+dr,c+1:c+1+dc], color, err)  
+        color = [0.6,0.5,0.4] # reddish gray
+        scatter[r+1:r+1+dr,c+1:c+1+dc] += err * (np.array(color)-scatter[r+1:r+1+dr,c+1:c+1+dc]) 
 
+        #if err < 0.2  :
+        #    color = [0.0,1.0,0.0] # bright green
+        #    scatter[r+1:r+3,c+1:c+1+dc] += 0.3 * (np.array(color)-scatter[r+1:r+3,c+1:c+1+dc]) 
     r += dr
-
 
 #r,c = best[1]
 #for r,c in ((100-80,101-20),(100-92,101-22),(100-80,101-40),(100+30,101+30)):
