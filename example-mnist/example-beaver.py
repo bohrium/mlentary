@@ -1,9 +1,9 @@
 ''' author: sam tenka
-    change: 2022-06-08
+    change: 2022-06-01
     create: 2022-05-16
     descrp: Generate plots for the digit-classification example in the prologue
             pages of our 6.86x notes.  
-    depend: keras
+    depend: keras 
     jargon: we'll consistently use these abbreviations when naming variables:
                 dec_func    --- decision function
                 idx(s)      --- index/indices within list of all examples 
@@ -43,18 +43,12 @@ SLATE        = np.array([ .5 , .5 , .5 ])
 SHADE        = np.array([ .1 , .1 , .1 ])
 BLACK        = np.array([ .0 , .0 , .0 ])
 
-RED          = np.array([1.0 , .0 , .0 ]) #####
-ORANGE       = np.array([ .75,0.25, .0 ]) #    
-BROWN        = np.array([ .5 ,0.5 , .0 ]) ###    # i.e., dark YELLOW
-OLIVE        = np.array([ .25,0.75, .0 ]) #    
-GREEN        = np.array([ .0 ,1.0 , .0 ]) #####
-AGAVE        = np.array([ .0 , .75, .25]) #    
-CYAN         = np.array([ .0 , .5 , .5 ]) ###  
-JUNIPER      = np.array([ .0 , .25, .75]) #    
-BLUE         = np.array([ .0 , .0 ,1.0 ]) ##### 
-INDIGO       = np.array([ .25, .0 , .75]) #    
-MAGENTA      = np.array([ .5 , .0 , .5 ]) ###  
-AMARANTH     = np.array([ .75, .0 , .25]) #    
+RED          = np.array([1.0 , .0 , .0 ])
+BROWN        = np.array([0.5 ,0.5 , .0 ])
+GREEN        = np.array([ .0 ,1.0 , .0 ])
+CYAN         = np.array([ .0 , .5 , .5 ])
+BLUE         = np.array([ .0 , .0 ,1.0 ])
+MAGENTA      = np.array([ .5 , .0 , .5 ])
 
 def overlay_color(background, foreground, foreground_opacity=1.0):
     background += foreground_opacity * (foreground - background)
@@ -70,10 +64,9 @@ MAX_PIX_VAL = 255
 
 #--------------  0.1.1. data preparation ---------------------------------------
 
-NB_TEST      = 400
-NB_TRAIN     =  25
-NB_TRAIN_MAX = 200
-DARKNESS_THRESH   = 0.5
+NB_TEST  = 400
+NB_TRAIN =  25
+THRESH   = 0.5
 
 #--------------  0.1.1. learning parameters  -----------------------------------
 
@@ -124,18 +117,24 @@ for param_name in PARAM_NAMES_BY_MODEL[MODEL]:
 
 #--------------  1.0.0. read images and labels from disk  ----------------------
 
-# this line loads the (x=digitphotos, y=whichdigit) data set into memory
-(all_x, all_y), _ = mnist.load_data()
-# all_x[1000,14,14] == some floating point number from 0 to 255
+# this line loads the (x=digitphotos, y=whichdigit) data set into computer memory
+#(all_x, all_y), _ = mnist.load_data()
+all_x = mnist.load_data()[0][0]
+all_y = mnist.load_data()[0][1]
+
+## ^ (N,28,28)
+## all_x[1000,14,14] == some floating point number from 0 to 255
 
 #--------------  1.0.1. filter to only digits of interest  ---------------------
 
+# DIG_A == 1
+# DIG_B == 9
 idxs = np.logical_or(np.equal(all_y, DIG_A), np.equal(all_y, DIG_B))
 all_x = all_x[idxs]
 all_y = all_y[idxs]
 
-# now all_x contains only pictures of DIG_As and DIG_Bs (e.g. 1s and 9s)
-# and all_y contains only             DIG_As and DIG_Bs (e.g. 1s and 9s)
+# now all_x contains only pictures of 1s and 9s
+# and all_y contains only             1s and 9s
 # and they continue to correspond, e.g. all_ys[7] describes all_xs[7]
 
 print('all_y has shape {}'.format(all_y.shape))
@@ -149,11 +148,42 @@ all_x = (1.0/MAX_PIX_VAL) * all_x
 
 idxs = np.arange(len(all_y))
 np.random.shuffle(idxs)
-all_x = all_x[idxs]
+all_x = all_x[idxs] # [x, x, x]
 all_y = all_y[idxs]
 
-train_idxs = np.arange(0           , NB_TRAIN            )
-test_idxs  = np.arange(NB_TRAIN_MAX, NB_TRAIN_MAX+NB_TEST)
+train_idxs = np.arange(0       , NB_TRAIN        )
+test_idxs  = np.arange(NB_TRAIN+175, NB_TRAIN+175+NB_TEST)
+
+#darkness  = lambda x: np.mean(np.mean(x)) # darkness 
+#height = lambda x: ...
+#
+#list_of_darknesses = [darkness(x) for x in all_x[train_idxs]]  # [0.3, 0.1, 0.02, ...]
+#sum_train_darkness = 0.0
+#element_count      = 0.0 
+#for darkness_value in list_of_darknesses:
+#    sum_train_darkness += darkness_value 
+#    element_count += 1
+#avg_train_darkness = sum_train_darkness/element_count 
+
+
+#CANONICAL_NINE = all_x[0]
+#CANONICAL_ONE  = all_x[1]
+#
+#PHOTO_TO_CLASSIFY = all_x[2]
+#nines_overlap = 0
+#ones_overlap  = 0
+#for row in range(28):
+#    for col in range(28): 
+#        if abs(CANONICAL_NINE[row][col] - PHOTO_TO_CLASSIFY[row][col]) < 0.5:
+#            nines_overlap = nines_overlap +1
+#        if abs(CANONICAL_ONE [row][col] - PHOTO_TO_CLASSIFY[row][col]) < 0.5:
+#            ones_overlap = ones_overlap +1
+#print(nines_overlap, ones_overlap)
+#if nines_overlap > ones_overlap:
+#    print('i guess it is a nine')
+#else:
+#    print('i guess it is a one')
+#print('truth is', all_y[2])
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~  1.1. Define Featurizations  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -164,39 +194,22 @@ raw_moments = lambda w,a: tuple(np.sum(w*np.power(a,i)) for i in range(3))
 std_moments = lambda w,a: (lambda r0,r1,r2: (r1/r0, r2/r0-(r1/r0)**2))(*raw_moments(w,a)) 
 std_range = lambda a: (np.amax(a)-np.amin(a)) if len(a) else 0
 
-#--------------  1.1.1. overlap with representatives features  -----------------
+#--------------  1.1.1. mean-darkness features  --------------------------------
 
-CANONICAL_DIG_A = next((x for x,y in zip(all_x,all_y) if y==DIG_A)) # TODO: make sure only in train set 
-CANONICAL_DIG_B = next((x for x,y in zip(all_x,all_y) if y==DIG_B)) # TODO: make sure only in train set 
+darkness  = lambda x: np.mean(np.mean(x)) # darkness 
 
-def make_overlap_feature(canonical_x, threshold=DARKNESS_THRESH):
-    return lambda x: np.count_nonzero(np.abs(x-canonical_x)<threshold)/float(DIG_SIDE)**2
-
-overlap_A = make_overlap_feature(CANONICAL_DIG_A)
-overlap_B = make_overlap_feature(CANONICAL_DIG_B)
-
-PHOTO_TO_CLASSIFY, LABEL = all_x[2], all_y[2]
-oA = overlap_A(PHOTO_TO_CLASSIFY)
-oB = overlap_B(PHOTO_TO_CLASSIFY)
-print("i think it's a {}; it's really a {}!".format(
-        DIG_A if -1.0*oA+1.0*oB<0 else DIG_B,
-        LABEL))
-
-#--------------  1.1.2. mean darkness features  --------------------------------
-
-darkness  = lambda x: np.mean(x)
-
-central_pixel_darkness  = lambda x: x[DIG_SIDE//2, DIG_SIDE//2] 
+central_darkness  = lambda x: x[DIG_SIDE//2, DIG_SIDE//2] 
+#central_darkness  = lambda x: x[DIG_SIDE//2-5:DIG_SIDE//2+6, DIG_SIDE//2-5:DIG_SIDE//2+6] 
 
 bottomink = lambda x: np.mean(np.mean(x[DIG_SIDE//2:,:])) 
 topink    = lambda x: np.mean(np.mean(x[:DIG_SIDE//2,:])) 
 leftink   = lambda x: np.mean(np.mean(x[:,:DIG_SIDE//2])) 
 rightink  = lambda x: np.mean(np.mean(x[:,DIG_SIDE//2:])) 
 
-#--------------  1.1.3. spatial spread features  -------------------------------
+#--------------  1.1.2. spatial-spread features  -------------------------------
 
-height = lambda x: np.std([row for (row,col) in DIG_2COORS if x[row,col]>DARKNESS_THRESH]) / (DIG_SIDE/2.0)
-width  = lambda x: np.std([col for (row,col) in DIG_2COORS if x[row,col]>DARKNESS_THRESH]) / (DIG_SIDE/2.0)
+height = lambda x: np.std([row for (row,col) in DIG_2COORS if x[row,col]>THRESH]) / (DIG_SIDE/2.0)
+width  = lambda x: np.std([col for (row,col) in DIG_2COORS if x[row,col]>THRESH]) / (DIG_SIDE/2.0)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~  1.2. Featurize Input Data  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -233,32 +246,25 @@ testing_errors  = {'linear':{}, 'affine':{}, 'quadratic':{}}
 # training loss is a sum (x_i, y_i) of hinge(-y_i*w_i*z_i)
 # D training loss is a 
 
-all_y_signs = np.array([+1 if y==DIG_B else -1 for y in all_y]) 
+all_y_signs = np.array([+1 if y==9 else -1 for y in all_y]) 
 def gradient_of_training_loss_wrt_weight(weight): 
-    ''' mean over i of (0 if -yi*w*xi<-1 else 1) * (-yi*xi) '''
+    ''' returns sum (x_i, y_i) of (0 if -y_i*w_i*x_i<-1 else 1) * (-y_i*x_i) '''
     return np.mean([
         (0 if -all_y_signs[idx]*np.dot(weight,all_z[idx])<-1 else 1) *
              (-all_y_signs[idx]*all_z[idx])
-         for idx in train_idxs], axis=0) # FIXED BUG: needed `axis=0`! 
+        for idx in train_idxs])
 
-def training_loss(weight):
-    return np.mean([np.maximum(0, 1-all_y_signs[idx]*np.dot(weight,all_z[idx]))
-                    for idx in train_idxs])
+learn_rate = 0.1
 
-def zero_one_error(weight):
-    return np.mean([(0 if -all_y_signs[idx]*np.dot(weight,all_z[idx])<0 else 1)
-                    for idx in train_idxs])
+weight = np.array([0.0, 0.1])
+for _ in range(1000):
+    weight -= learn_rate * gradient_of_training_loss_wrt_weight(weight) 
 
-def gradient_descend(learning_rate, nb_steps, report_every=None):
-    weight = np.array([0.0, 0.0])
-    for t in range(nb_steps):
-        weight -= learning_rate * gradient_of_training_loss_wrt_weight(weight) 
-        if report_every is None or t%report_every: continue
-        print('step {:6d}: got training error {:2.0f}%, training loss {:4.2f}, at weight [{}]'.format(
-            t,
-            100.0*zero_one_error(weight),
-            training_loss(weight),
-            ', '.join('{:+6.2f}'.format(w) for w in weight)))
+
+
+print(weight)
+
+input('waiting for you')
 
 for param in tqdm.tqdm(PARAMS):
     classifier = make_classifier(dec_func_maker_by_model[MODEL](*param))
@@ -411,24 +417,26 @@ def plot_weights(data_height=PLT_SIDE, data_width=PLT_SIDE, margin=MARG,
 
 #--------------  3.0.3. make all plots  ----------------------------------------
 
-plot_features(idxs=test_idxs, file_name='new-test.png', opacity_factor=0.25,
-              min_vert=0.0, max_vert=1.0,  min_hori=0.0, max_hori=1.0,
-              interesting_params=[(11.0,-3.0), (-10.0,10.0)], dec_func_maker=dec_func_maker_by_model[MODEL],
-             )
-
-plot_weights(error_by_param=testing_errors[MODEL], file_name='new-test-scat.png',
-             min_vert=-100.0, max_vert=100.0,  min_hori=-100.0, max_hori=100.0,
-             interesting_params=[(20.0,-5.0), (-20.0,20.0)],
-             )
+#plot_features(idxs=test_idxs, file_name='new-test.png', opacity_factor=1.0,
+#              min_vert=0.0, max_vert=1.0,  min_hori=0.0, max_hori=1.0,
+#              interesting_params=[(11.0,-3.0), (-10.0,10.0)], dec_func_maker=dec_func_maker_by_model[MODEL],
+#             )
+#
+#plot_weights(error_by_param=testing_errors[MODEL], file_name='new-test-scat.png',
+#             min_vert=-100.0, max_vert=100.0,  min_hori=-100.0, max_hori=100.0,
+#             interesting_params=[(20.0,-5.0), (-20.0,20.0)],
+#             )
 
 plot_features(idxs=train_idxs, file_name='new-train.png', opacity_factor=1.0,
               min_vert=0.0, max_vert=1.0,  min_hori=0.0, max_hori=1.0,
+              #interesting_params=[(11.0,-3.0), (-10.0,10.0), (15.0, -10.0)],
               interesting_params=[(20.0,-5.0), (-30.0,30.0), (30.0, -20.0)],
               dec_func_maker=dec_func_maker_by_model[MODEL],
              )
 
 plot_weights(error_by_param=training_errors[MODEL], file_name='new-train-scat.png',
              min_vert=-100.0, max_vert=100.0,  min_hori=-100.0, max_hori=100.0,
+             #interesting_params=[(11.0,-3.0), (-10.0,10.0), (15.0, -10.0)],
              interesting_params=[(20.0,-5.0), (-30.0,30.0), (30.0, -20.0)],
              )
 

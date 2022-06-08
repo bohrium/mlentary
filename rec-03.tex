@@ -1,0 +1,291 @@
+% author:   sam tenka
+% change:   2022-05-27
+% create:   2022-05-11
+
+%==============================================================================
+%====  0.  DOCUMENT SETTINGS  ================================================
+%==============================================================================
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.0. About this Exposition  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%---------------------  0.0.0. page geometry  ---------------------------------
+\documentclass[11pt, justified]{tufte-book}
+\geometry{
+  left           = 0.90in, % left margin
+  textwidth      = 4.95in, % main text block
+  marginparsep   = 0.15in, % gutter between main text block and margin notes
+  marginparwidth = 2.30in, % width of margin notes
+                 % 0.20in  % width from margin to edge
+}
+
+%---------------------  0.0.1. math packages  ---------------------------------
+\newcommand\hmmax{0} % to allow for more fonts 
+\newcommand\bmmax{0} % to allow for more fonts
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{bm}
+\usepackage{euler}
+
+\usepackage{array}   % for \newcolumntype macro
+\newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
+\newcolumntype{C}{>{$}c<{$}} % math-mode version of "c" column type
+\newcolumntype{R}{>{$}r<{$}} % math-mode version of "r" column type
+
+%---------------------  0.0.2. graphics packages  -----------------------------
+\usepackage{graphicx, xcolor}
+\usepackage{float, capt-of}
+
+%---------------------  0.0.3. packages for fancy text  -----------------------
+\usepackage{enumitem}\setlist{nosep}
+\usepackage{listings}
+\usepackage{xstring}
+\usepackage{fontawesome5}
+
+%---------------------  0.043. colors  ----------------------------------------
+\definecolor{mblu}{rgb}{0.05, 0.35, 0.70} \newcommand{\blu}{\color{mblu}}
+\definecolor{mbre}{rgb}{0.30, 0.45, 0.60} \newcommand{\bre}{\color{mbre}}
+\definecolor{mbro}{rgb}{0.60, 0.05, 0.05} \newcommand{\bro}{\color{mbro}}
+\definecolor{mcya}{rgb}{0.10, 0.45, 0.45} \newcommand{\cya}{\color{mcya}}
+\definecolor{mgre}{rgb}{0.55, 0.55, 0.50} \newcommand{\gre}{\color{mgre}}
+\definecolor{mgrn}{rgb}{0.15, 0.65, 0.05} \newcommand{\grn}{\color{mgrn}}
+\definecolor{mred}{rgb}{0.90, 0.05, 0.05} \newcommand{\red}{\color{mred}}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.1. Headers and References  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%---------------------  0.1.0. intra-document references  ---------------------
+\newcommand{\offour}[1]{
+    {\tiny \raisebox{0.04cm}{\scalebox{0.9}{$\substack{
+        \IfSubStr{#1}{0}{{\blacksquare}}{\square}   
+        \IfSubStr{#1}{1}{{\blacksquare}}{\square} \\ 
+        \IfSubStr{#1}{2}{{\blacksquare}}{\square}   
+        \IfSubStr{#1}{3}{{\blacksquare}}{\square}   
+    }$}}}%
+}
+
+\newcommand{\offourline}[1]{
+    {\tiny \raisebox{0.04cm}{\scalebox{0.9}{$\substack{
+        \IfSubStr{#1}{0}{{\blacksquare}}{\square}   
+        \IfSubStr{#1}{1}{{\blacksquare}}{\square}
+        \IfSubStr{#1}{2}{{\blacksquare}}{\square}   
+        \IfSubStr{#1}{3}{{\blacksquare}}{\square}   
+    }$}}}%
+}
+\newcommand{\notesam}[1]{{\blu \textsf{#1}}}
+\newcommand{\attn}[1]{{\bro \textsf{#1}}}
+\newcommand{\attnsam}[1]{{\red \textsf{#1}}}
+
+\newcommand{\blarr}{\hspace{-0.15cm}${\bro \leftarrow}\,$}
+\newcommand{\bcirc}{${\bro ^\circ}$}
+
+\newcounter{footprintssofar}
+\setcounter{footprintssofar}{90}
+\newcommand{\plainfootprint}{{\bro \rotatebox{\value{footprintssofar}}{\faIcon{shoe-prints}}}\setcounter{footprintssofar}{\value{footprintssofar}+30} }
+\newcommand{\footprint}{\marginnote{\plainfootprint} }
+
+%---------------------  0.1.1. table of contents helpers  ---------------------
+\newcommand{\phdot}{\phantom{.}}
+
+%---------------------  0.1.2. section headers  -------------------------------
+\newcommand{\samtitle} [1]{
+  \par\noindent{\Huge \sf \blu #1}
+  \vspace{0.4cm}
+}
+
+\newcommand{\samquote} [2]{
+    \marginnote[-0.4cm]{\begin{flushright}
+    \scriptsize
+        \gre {\it #1} \\ --- #2
+    \end{flushright}}
+}
+
+\newcommand{\samsection} [1]{
+  \vspace{0.5cm}
+  \par\noindent{\LARGE \sf \blu #1}
+  \vspace{0.1cm}\par
+}
+
+\newcommand{\samsubsection}[1]{
+  \vspace{0.3cm}
+  \par\noindent{\Large \sf \bre #1}
+  \vspace{0.1cm}\par
+}
+
+\newcommand{\samsubsubsection}[1]{
+   \vspace{0.1cm}
+   \par\noindent{\hspace{-2cm}\normalsize \sc \gre #1} ---
+}
+
+%---------------------  0.1.3. clear the bibliography's header  ---------------
+\usepackage{etoolbox}
+\patchcmd{\thebibliography}{\section*{\refname}}{}{}{}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  0.2. Math Symbols and Blocks  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%---------------------  0.2.0. general math operators  ------------------------
+\newcommand{\scirc}{\mathrel{\mathsmaller{\mathsmaller{\mathsmaller{\circ}}}}}
+\newcommand{\cmop}[2]{{(#1\!\to\!#2)}}
+
+%---------------------  0.2.1. probability symbols  ---------------------------
+\newcommand{\KL}{\text{KL}}
+\newcommand{\EN}{\text{H}}
+\newcommand{\note}[1]{{\blu \textsf{#1}}}
+
+%---------------------  0.2.2. losses averaged in various ways  ---------------
+\newcommand{\Ein}  {\text{trn}_{\sS}}
+\newcommand{\Einb} {\text{trn}_{\check\sS}}
+\newcommand{\Einc} {\text{trn}_{\sS\sqcup \check\sS}}
+\newcommand{\Egap} {\text{gap}_{\sS}}
+\newcommand{\Eout} {\text{tst}}
+
+%---------------------  0.2.3. double-struck and caligraphic upper letters  ---
+\newcommand{\Aa}{\mathbb{A}}\newcommand{\aA}{\mathcal{A}}
+\newcommand{\Bb}{\mathbb{B}}\newcommand{\bB}{\mathcal{B}}
+\newcommand{\Cc}{\mathbb{C}}\newcommand{\cC}{\mathcal{C}}
+\newcommand{\Dd}{\mathbb{D}}\newcommand{\dD}{\mathcal{D}}
+\newcommand{\Ee}{\mathbb{E}}\newcommand{\eE}{\mathcal{E}}
+\newcommand{\Ff}{\mathbb{F}}\newcommand{\fF}{\mathcal{F}}
+\newcommand{\Gg}{\mathbb{G}}\newcommand{\gG}{\mathcal{G}}
+\newcommand{\Hh}{\mathbb{H}}\newcommand{\hH}{\mathcal{H}}
+\newcommand{\Ii}{\mathbb{I}}\newcommand{\iI}{\mathcal{I}}
+\newcommand{\Jj}{\mathbb{J}}\newcommand{\jJ}{\mathcal{J}}
+\newcommand{\Kk}{\mathbb{K}}\newcommand{\kK}{\mathcal{K}}
+\newcommand{\Ll}{\mathbb{L}}\newcommand{\lL}{\mathcal{L}}
+\newcommand{\Mm}{\mathbb{M}}\newcommand{\mM}{\mathcal{M}}
+\newcommand{\Nn}{\mathbb{N}}\newcommand{\nN}{\mathcal{N}}
+\newcommand{\Oo}{\mathbb{O}}\newcommand{\oO}{\mathcal{O}}
+\newcommand{\Pp}{\mathbb{P}}\newcommand{\pP}{\mathcal{P}}
+\newcommand{\Qq}{\mathbb{Q}}\newcommand{\qQ}{\mathcal{Q}}
+\newcommand{\Rr}{\mathbb{R}}\newcommand{\rR}{\mathcal{R}}
+\newcommand{\Ss}{\mathbb{S}}\newcommand{\sS}{\mathcal{S}}
+\newcommand{\Tt}{\mathbb{T}}\newcommand{\tT}{\mathcal{T}}
+\newcommand{\Uu}{\mathbb{U}}\newcommand{\uU}{\mathcal{U}}
+\newcommand{\Vv}{\mathbb{V}}\newcommand{\vV}{\mathcal{V}}
+\newcommand{\Ww}{\mathbb{W}}\newcommand{\wW}{\mathcal{W}}
+\newcommand{\Xx}{\mathbb{X}}\newcommand{\xX}{\mathcal{X}}
+\newcommand{\Yy}{\mathbb{Y}}\newcommand{\yY}{\mathcal{Y}}
+\newcommand{\Zz}{\mathbb{Z}}\newcommand{\zZ}{\mathcal{Z}}
+
+%---------------------  0.2.4. sans serif and frak lower letters  -------------
+\newcommand{\sfa}{\mathsf{a}}\newcommand{\fra}{\mathcal{a}}
+\newcommand{\sfb}{\mathsf{b}}\newcommand{\frb}{\mathcal{b}}
+\newcommand{\sfc}{\mathsf{c}}\newcommand{\frc}{\mathcal{c}}
+\newcommand{\sfd}{\mathsf{d}}\newcommand{\frd}{\mathcal{d}}
+\newcommand{\sfe}{\mathsf{e}}\newcommand{\fre}{\mathcal{e}}
+\newcommand{\sff}{\mathsf{f}}\newcommand{\frf}{\mathcal{f}}
+\newcommand{\sfg}{\mathsf{g}}\newcommand{\frg}{\mathcal{g}}
+\newcommand{\sfh}{\mathsf{h}}\newcommand{\frh}{\mathcal{h}}
+\newcommand{\sfi}{\mathsf{i}}\newcommand{\fri}{\mathcal{i}}
+\newcommand{\sfj}{\mathsf{j}}\newcommand{\frj}{\mathcal{j}}
+\newcommand{\sfk}{\mathsf{k}}\newcommand{\frk}{\mathcal{k}}
+\newcommand{\sfl}{\mathsf{l}}\newcommand{\frl}{\mathcal{l}}
+\newcommand{\sfm}{\mathsf{m}}\newcommand{\frm}{\mathcal{m}}
+\newcommand{\sfn}{\mathsf{n}}\newcommand{\frn}{\mathcal{n}}
+\newcommand{\sfo}{\mathsf{o}}\newcommand{\fro}{\mathcal{o}}
+\newcommand{\sfp}{\mathsf{p}}\newcommand{\frp}{\mathcal{p}}
+\newcommand{\sfq}{\mathsf{q}}\newcommand{\frq}{\mathcal{q}}
+\newcommand{\sfr}{\mathsf{r}}\newcommand{\frr}{\mathcal{r}}
+\newcommand{\sfs}{\mathsf{s}}\newcommand{\frs}{\mathcal{s}}
+\newcommand{\sft}{\mathsf{t}}\newcommand{\frt}{\mathcal{t}}
+\newcommand{\sfu}{\mathsf{u}}\newcommand{\fru}{\mathcal{u}}
+\newcommand{\sfv}{\mathsf{v}}\newcommand{\frv}{\mathcal{v}}
+\newcommand{\sfw}{\mathsf{w}}\newcommand{\frw}{\mathcal{w}}
+\newcommand{\sfx}{\mathsf{x}}\newcommand{\frx}{\mathcal{x}}
+\newcommand{\sfy}{\mathsf{y}}\newcommand{\fry}{\mathcal{y}}
+\newcommand{\sfz}{\mathsf{z}}\newcommand{\frz}{\mathcal{z}}
+
+%---------------------  0.2.5. math environments  -----------------------------
+\newtheorem*{qst}{Question}
+\newtheorem*{thm}{Theorem}
+\newtheorem*{lem}{Lemma}
+% ...
+\theoremstyle{definition}
+\newtheorem*{dfn}{Definition}
+
+%==============================================================================
+%=====  1.  PROLOGUE  =========================================================
+%==============================================================================
+
+\begin{document}
+\samtitle{recitation 03 (optional 6.86x notes)}
+
+      \marginnote{%
+        %These notes overlap with what we'll cover in recitation.  But
+        Recitation will have more coding practice and much less detail than
+        these notes.  We'll skip whole sections of these notes during
+        recitation.
+        %
+        Footprints --- \plainfootprint --- in these notes indicate roughly
+        which points we will linger on during recitation.  Each footprint
+        represents perhaps three to seven minutes of recitation time.  
+        %
+        %A recitation might have eighteen footprints.
+      }
+
+      \attn{You do not need to read these notes at all} to get an A
+      in this course; conversely, \attn{you may not cite these notes} when
+      solving homework or exams.
+       
+%==============================================================================
+%=====  3.  LINEAR MODELS  ====================================================
+%==============================================================================
+
+  \newpage
+  \samsection{C. linear models: getting bang for your buck}
+    \samsubsection{selecting models that generalize} 
+      \samquote{
+        All human beings have three lives: public, private, and secret.
+      }{gabriel garc\`ia marquez}
+      %\samsubsubsection{taking stock so far}
+      \samsubsubsection{grid/random search}
+      \samsubsubsection{selecting prior strength}
+      \samsubsubsection{rules of thumb} 
+        \attnsam{dimension generalization bound}
+        \attnsam{margin    generalization bound}
+      \samsubsubsection{overfitting on a validation set}
+
+    %\newpage
+    %\samsubsection{generalization bounds} 
+    %  \samquote{
+    %    A foreign philosopher rides a train in Scotland.  Looking out the window,
+    %    they see a black sheep; they exclaim: ``wow!  at least one side of one sheep is black in Scotland!'' 
+    %  }{unknown}
+    %  \samsubsubsection{dot products and generalization}
+    %  \samsubsubsection{dimension bound}
+    %  \samsubsubsection{margin bound}
+    %  \samsubsubsection{bayes and testing} % PAC Bayes?  testing Sets?  or maybe testing sets should be part of model selection
+
+    \newpage
+    \samsubsection{ideas in optimization} 
+      \samquote{
+        premature optimization is the root of all evil
+      }{donald knuth}
+      \samquote{
+        Where is the tension?  Every good theorem should have tension between
+        hypothesis and conclusion. 
+      }{dennis sullivan}
+
+
+      \samsubsubsection{local minima} % convexity, initialization}
+      \samsubsubsection{implicit regularization}
+      \samsubsubsection{learning rate schedule}
+      \samsubsubsection{learning rates as dot products} % connects to whitening / pre-conditioning; ties into next subsection on kernels
+
+    \newpage
+    \samsubsection{kernels enrich approximations} 
+      \samquote{... animals are divided into (a) those
+        belonging to the emperor; (b) embalmed ones; (c) trained ones; (d)
+        suckling pigs; (e) mermaids; (f) fabled ones; (g) stray dogs; (h) those
+        included in this classification; (i) those that tremble as if they were
+        mad; (j) innumerable ones; (k) those drawn with a very fine camel hair
+        brush; (l) et cetera; (m) those that have just broken the vase; and (n)
+        those that from afar look like flies.
+      }{jorge luis borges}
+      \samsubsubsection{features as pre-processing} % start with example of (x \mapsto (1, x)) bias trick!
+      \samsubsubsection{abstracting to dot products} % mention mercer but don't emphasize
+      \samsubsubsection{kernelized perceptron and svm} % also gaussian process regression?
+      \samsubsubsection{kernelized logistic regression} % leads to nonlinearities...
+
+\end{document}
+

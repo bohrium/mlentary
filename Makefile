@@ -12,6 +12,13 @@ rec-02:
 	rm 		 rec-02.log
 	rm 		 rec-02.out
 
+rec-03:
+	pdflatex rec-03.tex
+	evince 	 rec-03.pdf
+	rm 		 rec-03.aux
+	rm 		 rec-03.log
+	rm 		 rec-03.out
+
 
 mlentary:
 	pdflatex mlentary.tex
