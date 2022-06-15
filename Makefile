@@ -1,3 +1,11 @@
+mlentary:
+	pdflatex mlentary.tex
+	pdflatex mlentary.tex
+	evince 	 mlentary.pdf
+	rm 		 mlentary.aux
+	rm 		 mlentary.log
+	rm 		 mlentary.out
+
 rec-01:
 	pdflatex rec-01.tex
 	evince 	 rec-01.pdf
@@ -19,13 +27,6 @@ rec-03:
 	rm 		 rec-03.log
 	rm 		 rec-03.out
 
-
-mlentary:
-	pdflatex mlentary.tex
-	evince 	 mlentary.pdf
-	rm 		 mlentary.aux
-	rm 		 mlentary.log
-	rm 		 mlentary.out
 
 
 twelve-steps:

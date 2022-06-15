@@ -252,16 +252,15 @@ def gradient_of_training_loss_wrt_weight(weight):
     return np.mean([
         (0 if -all_y_signs[idx]*np.dot(weight,all_z[idx])<-1 else 1) *
              (-all_y_signs[idx]*all_z[idx])
-        for idx in train_idxs])
+        for idx in train_idxs], axis=0)
 
 learn_rate = 0.1
 
-weight = np.array([0.0, 0.1])
-for _ in range(1000):
+weight = np.array([0.0, 0.0])
+for t in range(1000):
     weight -= learn_rate * gradient_of_training_loss_wrt_weight(weight) 
-
-
-
+    if t%100: continue 
+    print(weight)
 print(weight)
 
 input('waiting for you')

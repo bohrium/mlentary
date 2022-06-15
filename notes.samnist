@@ -1,0 +1,16 @@
+=== SAMNIST ===
+
+inspired by letterspirit and omniglot 
+(Nx28x28, Nx10) classification challenge as with mnist.
+
+5 x 5 x 5 x 5  photography styles 
+(no noise, camera grain, uneven lighting, blooming, out of focus) x 
+(straight-on, skewed N/S/E/W) x
+(no occlusion, tear occlusion, bit of other letter poking through, mirror image, lined paper) x
+(black fill, white fill, black edge, white edge, clear refraction on grid background)
+
+3 x 3 x 3 x 3  font styles
+(cursive, print, hand imitating 7 segment) x 
+(don't align, align to square grid, align to triangle grid) x
+(loose hand, tight hand, left hand (wriggly?)) x
+(loops lover, tails lover, crosses lover)

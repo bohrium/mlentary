@@ -80,7 +80,8 @@
 
 \newcounter{footprintssofar}
 \setcounter{footprintssofar}{90}
-\newcommand{\plainfootprint}{{\bro \rotatebox{\value{footprintssofar}}{\faIcon{shoe-prints}}}\setcounter{footprintssofar}{\value{footprintssofar}+30} }
+%\newcommand{\plainfootprint}{{\bro \rotatebox{\value{footprintssofar}}{\faIcon{shoe-prints}}}\setcounter{footprintssofar}{\value{footprintssofar}+30} }
+\newcommand{\plainfootprint}{}
 \newcommand{\footprint}{\marginnote{\plainfootprint} }
 
 %---------------------  0.1.1. table of contents helpers  ---------------------
@@ -209,20 +210,20 @@
 
 \begin{document}
 %\samtitle{recitation 01 (optional 6.86x notes)}
-\samtitle{recitation (optional 6.86x notes)}
+\samtitle{optional 6.86x notes}
 
-      \marginnote{%
-        %These notes overlap with what we'll cover in recitation.  But
-        Recitation has more coding and less theory than these notes.
-        %We'll
-        %skip whole passages of these notes during recitation.
-        %
-        Footprints --- \plainfootprint --- roughly indicate our pacing: we'll
-        linger on the points near each footprint for three to seven
-        minutes.
-        %
-        %A recitation might have eighteen footprints.
-      }
+      %\marginnote{%
+      %  %These notes overlap with what we'll cover in recitation.  But
+      %  Recitation has more coding and less theory than these notes.
+      %  %We'll
+      %  %skip whole passages of these notes during recitation.
+      %  %
+      %  Footprints --- \plainfootprint --- roughly indicate our pacing: we'll
+      %  linger on the points near each footprint for three to seven
+      %  minutes.
+      %  %
+      %  %A recitation might have eighteen footprints.
+      %}
 
       \attn{You do not need to read these notes at all} to get an A
       in this course; conversely, \attn{you may not cite these notes} when
@@ -408,7 +409,7 @@
           \caption{
             Our size-$N=25$ set of training examples, viewed in the
             darkness-height plane.  The vertical \emph{darkness} axis ranges
-            $[0.0,0.25]$; the horiziontal \emph{height} axis ranges $[0.0,0.5]$.
+            $[0.0,0.25]$; the horizontal \emph{height} axis ranges $[0.0,0.5]$.
             The origin is at the lower left.  Each {\cya{cyan}} dot represents a
             $y={\cya{1}}$ example; each {\red{red}} dot, a $y={\red{9}}$ one.
             %
@@ -428,7 +429,7 @@
         \begin{lstlisting}[language=Python, basicstyle=\footnotesize\ttfamily]
           SIDE = 28
           def darkness(x):
-            return np.mean(np.mean(x))
+            return np.mean(np.mean(x, axis=0), axis=0)
           def height(x):
             return np.std([row for col in range(SIDE)
                                for row in range(SIDE)
@@ -504,9 +505,9 @@
             \hspace{0.01\textwidth}%
             \includegraphics[width=0.23\textwidth]{example-mnist/new-train-scat.png}%
             \hspace{0.02\textwidth}%
-            \includegraphics[width=0.23\textwidth]{example-mnist/test.png}%
+            \includegraphics[width=0.23\textwidth]{example-mnist/new-test.png}%
             \hspace{0.01\textwidth}%
-            \includegraphics[width=0.23\textwidth]{example-mnist/test-scat.png}
+            \includegraphics[width=0.23\textwidth]{example-mnist/new-test-scat.png}
             %
             \caption{
               \textbf{Training
@@ -524,7 +525,7 @@
               Panes $\protect\offourline{23}$ show the same for
               \emph{testing} data.
               %
-              $\protect\offourline{02}$'s axes range $[0, 0.5]$.
+              $\protect\offourline{02}$'s axes range $[0, 1.0]$.
               $\protect\offourline{13}$'s axes range $[-99,+99]$. 
             }
             \label{fig:train-test-digits}
