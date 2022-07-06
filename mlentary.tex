@@ -220,6 +220,7 @@
       \item[D. a weekend hackathon]         \phdot  \pageref{chap:hackathon}
       \item[E. structured inference]        \phdot  \pageref{chap:structured}
       \item[F. reductions to supervision]   \phdot  \pageref{chap:reductions}
+      \item[] \vspace{0.05cm} \hrule \vspace{-0.05cm}
       \item[G. programming refresher]       \phdot  \pageref{chap:programming}
       \item[H. math refresher]              \phdot  \pageref{chap:math}
     \end{description}
@@ -228,7 +229,7 @@
   conversely, \attn{you may not cite these notes} when solving homework or
   exams.  Depending on your interests, you might
   want to start at chapter A (then BCDEF) or D (then ABCEF).
-  Chapters G, H review some but not all technical prerequisites.
+  Sample chapters G, H (review of some but not all prerequisites) as needed.
   %
   
   \samchapter{A. prologue}\label{chap:prologue}
@@ -385,13 +386,12 @@
           \includegraphics[width=0.47\textwidth]{example-mnist/mnist-trn-01}%\\$\cya{1}$
         \end{marginfigure}
         When we zoom in, we can see each photo's $28\times 28$ grid of pixels.
-        On the computer, this data is stored as a $28\times 28$ grid of numbers:
-        $0.0$ for bright through $1.0$ for dark.
-        Our convention will be to name these $28\times28$ grid locations by the
-        number of their row (counting starting from the top) and then of their
-        column (counting starting from the left).  So location $(0,0)$ is the
-        upper left corner pixel; location $(27,0)$ is the lower left corner
-        pixel.
+        On the computer, this data is stored as a $28\times 28$ grid of
+        numbers: $0.0$ for bright through $1.0$ for dark.  We'll name these
+        $28\times28$ grid locations by their row number (counting starting from
+        the top) followed by their column number (counting starting from the
+        left).  So location $(0,0)$ is the upper left corner pixel; location
+        $(27,0)$ is the lower left corner pixel.
         \par\noindent
         \attn{Exercise:} {Where is location $(0,27)$?  %$(14,8)$?
         In which direction is $(14,14)$ off-center?}
@@ -574,7 +574,7 @@
         function of $(a,b)$.}\footprint
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%~~~~~~~~~~~~~  1.6. error analysis  ~~~~~~~~~~`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%~~~~~~~~~~~~~  1.6. error analysis  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
       \sampassage{error analysis}
         Intuitively, our testing error of $18\%$ comes from three sources:
@@ -898,31 +898,35 @@
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~  2.2. richer outputs  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      \sampassage{richer outputs}%larger $\yY$s} % $k$-ary classification; regression; probabilities
+      \sampassage{richer outputs: larger $\yY$} 
         We've learned how to construct a set $\hH$ of candidate patterns 
         $$
           f_{\vec w}(\vec x) = \text{step}(\vec w\cdot \vec x) 
         $$
-        that map (a featurization of) a prompt $\vec x$ to a binary answer $y=0$ or $y=1$.
+        that map (a featurization of) a prompt $\vec x$ to a binary answer
+        $y=0$ or $y=1$.
 
         What if we're interested in predicting a richer kind of $y$?  For
         example, maybe there are $k$ many possible values for $y$ instead of
         just $2$.  Or maybe there are infinitely many possible values --- say,
-        if $y$ is a real number or a length-$l$ list of real numbers.  Or maybe we want the added nuance of
-        predicting probabilities, so that $f$ might output ``20\% chance of
-        label $y=0$ and 80\% chance of label $y=1$'' instead of just ``$y=1$''.
+        if $y$ is a real number or a length-$k$ list of real numbers.  Or maybe
+        we want the added nuance of predicting probabilities, so that $f$ might
+        output ``19\% chance of label $y=0$ and 80\% chance of label $y=1$ and
+        1\% chance of label $y=2$''
+        instead of just ``$y=1$''. 
 
         I'll write formulas and then explain.
-        $$
-          f_{\vec w_i : 0\leq i < k}(\vec x) = \text{argmax}_i(\vec w_i\cdot \vec x) 
-        $$
-        $$
-          f_{\vec w}(\vec x) = \vec w \cdot \vec x
-        $$
-        \attnsam{TODO: add multi-output regression?}
-        $$
-          f_{\vec w_i  : 0\leq i < k}(\vec x) = \text{normalize}(\exp(\vec w_i \cdot \vec x) : 0\leq i < k)
-        $$
+        \begin{align*}
+            \text{multi-class hard classification}\quad&
+            f_{(\vec w_i : 0\leq i < k)}(\vec x) = \text{argmax}_i(\vec w_i\cdot \vec x : 0\leq i<k) 
+        \\
+            \text{multi-output regression}\quad&
+            f_{(\vec w_i  : 0\leq i < k)}(\vec x) = (\exp(\vec w_i \cdot \vec x) : 0\leq i < k)
+        \\
+            \text{multi-class soft classification}\quad&
+            f_{(\vec w_i  : 0\leq i < k)}(\vec x) = \text{normalize}(\exp(\vec w_i \cdot \vec x) : 0\leq i < k)
+        \end{align*}
+
         \attnsam{TODO: interpret}
 
         \attnsam{TODO: discuss measures of goodness!}
@@ -993,12 +997,12 @@
         After this translation, MLE with the logistic model means finding $\vec
         w$ that minimizes
         $$
-          \sum_i \log(1+\exp(-y_i\vec w\cdot \vec x_i))
+          \sum_i \log_2(1+\exp(-y_i\vec w\cdot \vec x_i))
           =
           \sum_i \text{softplus}(-y_i\vec w\cdot \vec x_i) 
         $$
         Here, $\text{softplus}$ is our name for the function that sends
-        $z$ to $\log(1+\exp(z))$.
+        $z$ to $\log_2(1+\exp(z))$.
 
         %We get a crucial-in-history and intuition-pumping-in-modern-times
         %algorithm when we do logistic regression in the limit of low
@@ -1012,17 +1016,15 @@
 
       \newpage
       \sampassage{humble models}
-        %Logistic ain't the only way to go.
-        Let's generalize logistic classification to allow for \emph{unknown
-        unknowns}. We'll do this by allowing a classifier to distribute
-        probability mass not only among the labels $\yY$ but also to a special
-        class $\star$ that means ``no comment'' or ``alien input''.  
-        A logistic classifier always sets
-        $\Pp_{\sfy|\sfx}[\star|x] = 0$.
+        Let's modify logistic classification to allow for \emph{unknown
+        unknowns}. We'll do this by allowing a classifier to allot probability
+        mass not only among labels in $\yY$ but also to a special class $\star$
+        that means ``no comment'' or ``alien input''.  A logistic classifier
+        always sets $\Pp_{\sfy|\sfx}[\star|x] = 0$.
         %
-        But we could use other probability models that put nonzero mass on ``no
-        comment''; different models give different learning programs.  Here are
-        four models we might try:
+        Other probability models may put nonzero mass on ``no comment'';
+        different models give different learning programs.  Here are four
+        models we might consider:
         \newcommand{\zp}{u^{\!+\!}}
         \newcommand{\zm}{u^{\!-\!}}
         \begin{table}
@@ -1036,7 +1038,7 @@
             \Pp_{\sfy|\sfx}[\star| x]   & 1 - ~\text{above}=0   &1 - ~\text{above}          &1 - ~\text{above}          &1 - ~\text{above}          \\\hline %&1 - ~\text{above}               
             %                                                                                                                                                %                                
             \text{loss name}            &\text{softplus}(\cdot) &\text{srelu}(\cdot)        &\text{hinge}(\cdot)        &\text{quad}(\cdot)         \\       %&\text{parab}(\cdot)            
-            \text{formula}              &\log(1+(e-1)e^{(\cdot))}&\max(1,\cdot)+1            &\max(1,\cdot+1)            & ??                        \\       %&(\cdot+1)^2                    
+            \text{formula}              &\log_2(1+e^{(\cdot)})&\max(1,\cdot)+1            &\max(1,\cdot+1)            & ??                        \\       %&(\cdot+1)^2                    
             \text{update}               &1/(1+e^{+yd})        &\text{step}(-yd)           &\text{step}(1-yd)          & ??                        \\\hline %&2(1-yd)                        
             %                                                                                                                                                %                                
             \text{outliers}             &\text{vulnerable}      &\text{robust}              &\text{robust}              &\text{vulnerable}          \\       %&\text{vulnerable}              
@@ -1141,6 +1143,7 @@
         \attnsam{visual illustration of how choice of L2 dot product matters}
         \attnsam{$\ell^p$ regularization; sparsity}
         \attnsam{eye regularization example!}
+        \attnsam{TODO: rank as a prior (for multioutput models)}
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~  2.9. hierarchy, mixtures, transfer  ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1201,9 +1204,9 @@
 %~~~~~~~~~~~~~  2.16. dimension bound  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
       \sampassage{hypothesis-class-based bounds}
-        Suppose we are doing linear classification with $N$ training samples of
-        dimension $d$.  Then with probability at least $1-\delta$ the gen gap
-        is at most:
+        Suppose we are doing binary linear classification with $N$ training
+        samples of dimension $d$.  Then with probability at least $1-\delta$
+        the gen gap is at most:
         %\bcirc\marginnote{%
         %    \blarr we write $a^\cdot, a^{\cdot\cdot}$ for $(a+1), (a+2)$ to
         %    avoid overemphasizing annoying constants.
@@ -1212,13 +1215,27 @@
           \sqrt{\frac{d\log(6N/d) + \log(4/\delta)}{N}}
         $$
         For example, with $d=16$ features and tolerance $\delta=1/1000$, we
-        can achieve generalization gap less than $5\%$ once we have more than
-        $N\approx 64000$ samples.
+        can achieve a gen.\ gap of less than $5\%$ once we have more than
+        $N\approx 64000$ samples.  This is pretty lousy.  It's a worst case
+        bound in the sense that it doesn't make any assumptions about how
+        orderly or gnarly the data is.
 
-        If we normalize so that $\|x_i\|\leq 1$ and we insist on classifiers
-        with margin at least $0<m\leq 1$, then we may replace $d$ by
-        $1+1/m^2$ if we wish.
-        % dimension/margin 
+        If we normalize so that $\|x_i\|\leq R$ and we insist on classifiers
+        with margin at least $0<m\leq R$, then we may replace $d$ by
+        $\lceil 1+(R/m)^2 \rceil$ if we wish, so long as we count each
+        margin-violator as a training error, even if it is correctly
+        classified.
+
+        \attnsam{CHECK ABOVE!}
+
+        In particular, with chance at least $1-\delta$:
+        \begin{align*}
+            \text{testing error} \leq &~\frac{\text{(number of support vectors)}}{N}
+          +\\
+            &~\sqrt{\frac{\lceil 1+(R/m)^2 \rceil\log(6N/\lceil 1+(R/m)^2 \rceil) + \log(4/\delta)}{N}}
+        \end{align*}
+
+        \attnsam{dimension/margin}
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~  2.17. margin bound  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1234,8 +1251,9 @@
         testing-accuracy-of-hypotheses-learned-from-a-random-training-sample is
         unbiasedly estimated by the learned hypothesis's accuracy on the
         remaining data point.  This is a very coarse, high-variance estimate.
-        To address the variance, we can average over all $N+1$ choices\bcirc\marginnote{%
-          In principle, LOOCV requires training our model $N+1$ many times; we'll
+        To address the variance, we can average over all $N+1$
+        choices\bcirc\marginnote{%
+          \blarr In principle, LOOCV requires training our model $N+1$ many times; we'll
           soon see ways around this for the models we've talked about.
         }
         of which data point to remove from the training set.  When the
@@ -1248,7 +1266,8 @@
         variance in each LOOCV estimate is due to the testing points, which by
         assumption are independent.
 
-        We have that with chance at $1-\delta$: 
+        If all $x$s, train or test, have length at most $R$, then
+        we have that with chance at least $1-\delta$: 
         $$
             \Ee_{\sS}
             \text{testing error}
@@ -1465,7 +1484,31 @@
       \sampassage{auto emailer}
         Here's a fun project: let's make an email response drafter.  The
         `right' way to do this would be to use a pre-trained language model
-        such as GPT-3.  But we'll do it from scratch.
+        such as GPT-3.  But we'll do it from scratch and get worse but still
+        interesting results.  To give the user a bit of control, let's allow
+        them to specify the output's tone in the form of a thematic word like
+        ``coy'' or ``whimsical'' or ``pleading'' or ``authoritative''.
+        Specifically, let's use machine learning to create a stochastic
+        function of type
+        \begin{align*}
+            h: (\text{set of paragraphs}) \times (\text{set of words}) &\to
+            (\text{set of paragraphs})\\
+            (\text{prompt}, \text{tone word}) &\mapsto \text{response}
+        \end{align*}
+        By \emph{stochastic function}, I mean a randomized function that can
+        give different outputs for the same input.  By a \emph{paragraph}, I
+        mean a finite list whose every element is a word or one of a handful of
+        special symbols such as punctuation or \texttt{END-OF-MESSAGE}.  These
+        lists will have length in $[0,250)$.  By a \emph{word}, I mean any of
+        the top ten thousand english words most common according to some standard
+        catalogue.  When distinguishing words, we'll forget capitalization (so
+        \texttt{Cat} is the same as \texttt{cat}) but not conjugations/declensions
+        (so \texttt{running} is not the same as \texttt{run}).
+
+        Where will we get training data for this?  Well, let's take some of my
+        personal emails (scrubbed for privacy).  For tone words we'll be a bit
+        more clever...
+        \attnsam{FILL IN}
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~  4.1. factorization  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2080,6 +2123,11 @@
         and then thin again at the far end. That is my theory, it is mine, and
         belongs to me and I own it, and what it is too.
       }{john cleese}
+
+      \sampassage{belief and bayes}
+      \sampassage{the key abstraction: averages}
+      \sampassage{the key approximation: independence}
+      \sampassage{uniform concentration}
 
     \samsection{calculus and optimization}%gradients
       \samquote{

@@ -1,7 +1,7 @@
 ''' author: sam tenka
-    change: 2022-07-05
+    change: 2022-06-29
     create: 2022-06-13
-    descrp: 
+    descrp: .  
     depend: 
     jargon: we'll consistently use these abbreviations when naming variables:
                 dec_func    --- decision function
@@ -13,8 +13,10 @@
                 vert        --- to do with a graph's vertical axis
                 hori        --- to do with a graph's horizontal axis
                 clsfier     --- classifier
-    thanks: 
-    to use: Run `python3 example.py`.  
+    thanks: featurization idea inspired by abu-mostafa's book
+    to use: Run `python3 example.py`.  On first run, expect a downloading
+            progress bar to display and finish within 30 to 60 seconds; this
+            is for downloading the MNIST dataset we'll use.
 '''
 
 #===============================================================================
@@ -60,8 +62,7 @@ def overlay_color(background, foreground, foreground_opacity=1.0):
 #--------------  0.1.0. data preparation ---------------------------------------
 
 NB_TEST      =  900
-NB_TRAIN     =   50
-#NB_TRAIN     =  100
+NB_TRAIN     =   25
 NB_TRAIN_MAX = 5000
 BIAS = 0.5
 
@@ -79,22 +80,24 @@ np.random.seed(0)
 
 #--------------  0.2.1. define artificial galaxy data  -------------------------
 
-sym  = lambda: 2.15*(np.random.random()-0.5)
+sym  = lambda: 2.0*(np.random.random()-0.5)
 sym3 = lambda: sym()*sym()*sym()
 choice = lambda l: l[np.random.choice(len(l))]
 
 make_neg = lambda: choice([
-    (1.0*sym3(), 1.0*sym ()), 
+    (2.0*sym3(), 2.0*sym ()), 
     (1.0*sym (), 1.0*sym3()), 
+    #(1.5*sym3(), 1.5*sym ()), 
+    #(0.5*sym (), 0.5*sym3()), 
     ])
 make_pos = lambda: choice([
-    (+0.6+2.*0.2*sym3(), +0.0+2.*0.8*sym3()),
-    (-0.3+2.*0.5*sym3(), +0.3+2.*0.5*sym3()),
-    (-0.3+2.*0.8*sym3(), -0.3+2.*0.2*sym3()),
+    (+0.6+0.2*sym3(), +0.0+0.8*sym3()),
+    (-0.3+0.5*sym3(), +0.3+0.5*sym3()),
+    (-0.3+0.8*sym3(), -0.3+0.2*sym3()),
     ])
 
 clip = lambda x: min(1, max(-1, x))
-def post_process(p,f=3.0,o=0.1):
+def post_process(p,f=2.0,o=0.1):
     p0,p1 = p
     p0 -= o 
     r = np.sqrt(p0**2+p1**2)
@@ -119,11 +122,12 @@ all_y_sign = np.array([+1 if y==1 else -1 for y in all_y])
 #
 train_idxs = np.arange(0           , NB_TRAIN            )
 test_idxs  = np.arange(NB_TRAIN_MAX, NB_TRAIN_MAX+NB_TEST)
+#
 
-#===============================================================================
-#==  2. FIT MODELS  ============================================================
-#===============================================================================
-
+##===============================================================================
+##==  2. FIT MODELS  ============================================================
+##===============================================================================
+#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~  2.0. Define Linear Classifiers  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -211,7 +215,7 @@ def new_plot(data_h=PLT_SIDE, data_w=PLT_SIDE, margin=MARG,
 
 def plot_features(idxs=train_idxs,file_name='new-train.png', opacity_factor=1.0,
                   min_vert=-1.0, max_vert=1.0,  min_hori=-1.0, max_hori=1.0,
-                  interesting_params=[], ip_weights=None, 
+                  interesting_params=[], ip_weights=None, dec_func_maker=None,
                   data_h=PLT_SIDE, data_w=PLT_SIDE, margin=MARG,
                   nb_vert_axis_ticks=10, nb_hori_axis_ticks=10, dec_func=None):
 
@@ -219,6 +223,7 @@ def plot_features(idxs=train_idxs,file_name='new-train.png', opacity_factor=1.0,
     scatter = new_plot(data_h, data_w, margin,
                        nb_vert_axis_ticks, nb_hori_axis_ticks)
 
+    # color in decision boundary 
     if dec_func is not None:
         for r in range(data_h):
             for c in range(data_w):
@@ -227,23 +232,14 @@ def plot_features(idxs=train_idxs,file_name='new-train.png', opacity_factor=1.0,
                 z2 = min_hori + (max_hori-min_hori) * (    float(c)/(data_w-1))
 
                 dec = dec_func((z0,z1,z2)) 
+                if abs(dec) > 0.1 : continue
 
-                # general hueing:
-                color = SHADE if ip_weights is None else (
-                        SHADE + (CYAN-SHADE)*min(1.0, 0.2*-dec) if dec<0.0 else 
-                        SHADE + (RED -SHADE)*min(1.0, 0.2*+dec)) 
-                overlay_color(scatter[margin+r,margin+c], color, 0.2)
-
-                if abs(dec) > 0.15: continue
-
-                # color in decision boundary 
                 signs = lambda thresh:len(set([
                         np.sign(dec_func((z0,z1+thresh*i,z2+thresh*j)))
                         for i in range(-1,2) for j in range(-1,2)      ]))
 
                 opacity = np.mean([(1.0 if signs(thresh)==2 else 0.0) for thresh
-                    in (0.002,0.004,0.006)])
-                    #in (0.002,0.004,0.008,0.016)])**2
+                        in (0.002,0.004,0.006)])
                 if opacity==0.0: continue
 
                 rr = margin+r
@@ -252,30 +248,30 @@ def plot_features(idxs=train_idxs,file_name='new-train.png', opacity_factor=1.0,
                 overlay_color(scatter[rr-2:rr+3,cc       ], SMOKE, opacity*0.02)
                 overlay_color(scatter[rr       ,cc-1:cc+2], SLATE, opacity*0.10)
                 overlay_color(scatter[rr       ,cc-2:cc+3], SMOKE, opacity*0.02)
+
                 overlay_color(scatter[rr       ,cc       ], SHADE, opacity*0.50)
 
+    # color in each hypothesis
+    #for i,(p0,p1,p2) in list(enumerate(interesting_params)):
+    for i,(p0,p1,p2) in tqdm.tqdm(list(enumerate(interesting_params))):
+        for r in range(data_h):
+            for c in range(data_w):
+                z0 = BIAS 
+                z1 = min_vert + (max_vert-min_vert) * (1.0-float(r)/(data_h-1))
+                z2 = min_hori + (max_hori-min_hori) * (    float(c)/(data_w-1))
+                rr = np.sqrt(p0**2+p1**2+p2**2)
+                q0,q1,q2 = p0/rr, p1/rr, p2/rr
+                dec = q0*z0+q1*z1+q2*z2
 
-    ## color in each hypothesis
-    ##for i,(p0,p1,p2) in list(enumerate(interesting_params)):
-    #for r in range(data_h):
-    #    for c in range(data_w):
-    #        for i,(p0,p1,p2) in enumerate(interesting_params):
-    #            z0 = BIAS 
-    #            z1 = min_vert + (max_vert-min_vert) * (1.0-float(r)/(data_h-1))
-    #            z2 = min_hori + (max_hori-min_hori) * (    float(c)/(data_w-1))
-    #            rr = np.sqrt(p0**2+p1**2+p2**2)
-    #            q0,q1,q2 = p0/rr, p1/rr, p2/rr
-    #            dec = q0*z0+q1*z1+q2*z2
+                if dec<=-0.02: continue
+                opa = (0.05 * np.exp(-250.0*abs(dec)) if dec<0 else
+                       0.05 + 0.25 * min(1,rr*abs(ip_weights[i])*(dec/2.5)))
 
-    #            if 0.05 < abs(dec): continue
-    #            opa = (0.1 * np.exp(-150.0*abs(dec)) if dec<0 else
-    #                   0.1 + 0.5 * min(1,rr*abs(ip_weights[i])*(dec/1.0)))
+                color = SHADE if ip_weights is None else (
+                        SHADE + min(1,2.0*rr*abs(ip_weights[i]))*((CYAN if ip_weights[i]<0 else RED)-SHADE) 
+                        )
 
-    #            color = SHADE #SHADE if ip_weights is None else (
-    #                    #SHADE + min(1,2.0*rr*abs(ip_weights[i]))*((CYAN if ip_weights[i]<0 else RED)-SHADE) 
-    #                    #)
-
-    #            overlay_color(scatter[margin+r,margin+c], color, opa)
+                overlay_color(scatter[margin+r,margin+c], color, opa)
 
     # color in data scatter
     for idx in idxs:
@@ -290,68 +286,66 @@ def plot_features(idxs=train_idxs,file_name='new-train.png', opacity_factor=1.0,
     # save
     plt.imsave(file_name, scatter) 
 
-def get_train_stats(A, B, l2_reg):
-    dec_func = make_dec_func(A,B)
-    clsfier = make_clsfier(dec_func)
-    _, _, l = gradients(A,B, train_idxs, l2_reg)
-    return {'train-loss':l,
-            'train-err':error_rate(clsfier, train_idxs),
-            'test-err' :error_rate(clsfier, test_idxs ), 
-            }
-
-
 def gradient_descend(nb_hiddens, learning_rate, nb_steps, report_every=None, batch_size=15, l2_reg=0.000):
     # initialize:
     A = np.random.randn(nb_hiddens)
     B = np.random.randn(nb_hiddens,3)/np.sqrt(nb_hiddens+3)
-    print('training with '
-            '\033[33m{:2d}\033[34m hiddens and '
-            'learning rate \033[33m{:.4f}\033[34m...'.format(nb_hiddens, learning_rate))
-
+    print('training with {} hiddens and learning rate {}...'.format(nb_hiddens, learning_rate))
     # main loop:
-    for t in tqdm.tqdm(range(nb_steps)):
+    avg_train_loss = 0.0
+    for t in (range(nb_steps)):
         # SGD UPDATE: 
         batch = np.random.choice(train_idxs, batch_size, replace=False)
         gA, gB, l = gradients(A,B, batch, l2_reg)
         A -= 1.0 * learning_rate * gA * np.random.choice(2, gA.shape) 
         B -= 1.0 * learning_rate * gB * np.random.choice(2, gB.shape)
-         
+        avg_train_loss += ((l-avg_train_loss)*min(0.5,10.0/report_every)) if t and report_every else l
+        #
         # report progress during training loop:
         if report_every is None or t%report_every: continue
-
         # print numeric scores:
-        train_stats = get_train_stats(A,B, l2_reg)
-        print('     after \033[33m{:6d}\033[34m steps: '
-              'train-loss=\033[33m{:6.3f}\033[34m '
-               'train-err=\033[33m{:5.1f}%\033[34m '
-                'test-err=\033[33m{:5.1f}%\033[34m '.format(
+        dec_func = make_dec_func(A,B)
+        clsfier = make_clsfier(dec_func)
+        print('  after {:6d} steps: trainloss~{:6.3f} trainerr={:5.2f} testerr={:5.2f}'.format(
             t,
-            train_stats['train-loss'],
-            100*train_stats['train-err'],
-            100*train_stats['test-err'],
+            avg_train_loss,
+            error_rate(clsfier, train_idxs),
+            error_rate(clsfier, test_idxs ), 
             ))
+        ## plot decision boundary etc
+        #plot_features(
+        #    idxs=train_idxs,
+        #    dec_func=dec_func,
+        #    interesting_params = B,
+        #    ip_weights = A,
+        #    file_name='decfunc-{:03d}-{:04d}.png'.format(nb_hiddens,t),
+        #    opacity_factor=0.75,
+        #    ) 
+    ## plot decision boundary etc
+    print('  plotting...'.format(nb_hiddens))
+    plot_features(
+        idxs=train_idxs,
+        dec_func=dec_func,
+        interesting_params = B,
+        ip_weights = A,
+        file_name='mdecfunc-{:03d}-{:04d}.png'.format(nb_hiddens,t),
+        opacity_factor=0.75,
+        ) 
+    return {'trainloss':avg_train_loss,
+            'trainerr':error_rate(clsfier, train_idxs),
+            'testerr' :error_rate(clsfier, test_idxs ), 
+            }
 
-        # plot decision boundary etc
-        #print('  plotting...'.format(nb_hiddens))
-        plot_features(
-            idxs=train_idxs,
-            dec_func = make_dec_func(A,B),
-            interesting_params = B,
-            ip_weights = A,
-            file_name='omdecfunc-{:03d}-{:05d}.png'.format(nb_hiddens,t),
-            opacity_factor=0.75,
-            ) 
-
-    # return loss statistics
-    return get_train_stats(A,B, l2_reg)
-
-print("hey, let's train!\033[34m")
+print("hey, let's train!")
+#for nb_hiddens in [1,3,9,27,81,243,729]:
+#for nb_hiddens in [1,3,5,7,9,11,13,15]:
 #for nb_hiddens in [1,2,3,5,8,13,21,34,55]:
-#for nb_hiddens in [4,8,16,32,64,128]:
-for nb_hiddens in [6,12]:
+#for nb_hiddens in [34,55,89]:
+#for nb_hiddens in [4,6]:
+for nb_hiddens in [1,2,3,5,8,13,21,34,55]:
     metrics = gradient_descend(nb_hiddens    = nb_hiddens,
                                learning_rate = 0.20,
-                               nb_steps      =25000+1,
-                               report_every  = 5000, 
+                               nb_steps      =10000+1,
+                               report_every  = 1000, 
                               )
 

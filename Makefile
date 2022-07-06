@@ -27,6 +27,22 @@ rec-03:
 	rm 		 rec-03.log
 	rm 		 rec-03.out
 
+rec-06:
+	pdflatex rec-06.tex
+	evince 	 rec-06.pdf
+	rm 		 rec-06.aux
+	rm 		 rec-06.log
+	rm 		 rec-06.out
+
+rec-07:
+	pdflatex rec-07.tex
+	evince 	 rec-07.pdf
+	rm 		 rec-07.aux
+	rm 		 rec-07.log
+	rm 		 rec-07.out
+
+
+
 
 
 twelve-steps:
