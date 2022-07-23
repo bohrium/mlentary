@@ -6,6 +6,14 @@ mlentary:
 	rm 		 mlentary.log
 	rm 		 mlentary.out
 
+rec-08:
+	pdflatex rec-08.tex
+	evince 	 rec-08.pdf
+	rm 		 rec-08.aux
+	rm 		 rec-08.log
+	rm 		 rec-08.out
+
+
 rec-01:
 	pdflatex rec-01.tex
 	evince 	 rec-01.pdf

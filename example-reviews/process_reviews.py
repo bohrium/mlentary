@@ -7,8 +7,10 @@
 
 LOWER_ALL = True
 COUNT_THRESH = 3
-MIN_WORD_COUNT = 3 
+MIN_WORD_COUNT =  1
+MAX_WORD_COUNT = 10
 UNK = 'UNK'
+STOP= 'STOP'
 
 okay = set('ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz')
 clean = (lambda s: ''.join(c for c in s if c in okay).lower()  if LOWER_ALL else
@@ -29,14 +31,14 @@ def get_shared_words(lines):
         for w in r.split():
             counts[w] += 1
     shared_words = set(w for w in words if COUNT_THRESH<=counts[w]) 
-    shared_words.add(UNK)
+    shared_words.update([UNK, STOP])
     sw_by_idx = sorted(shared_words) 
     idx_by_sw = {sw:i for i,sw in enumerate(sw_by_idx)}
     return shared_words, sw_by_idx, idx_by_sw
 
 def featurize(review, shared_words):
     sws = [(w if w in shared_words else UNK) for w in review.split()]
-    return [idx_by_sw[sw] for sw in sws] 
+    return [idx_by_sw[sw] for sw in sws] + [idx_by_sw[STOP] for _ in range(MAX_WORD_COUNT-len(sws))] 
 
 if __name__=='__main__':
     lines = get_lines('reviews_train.tsv')
@@ -47,11 +49,13 @@ if __name__=='__main__':
     D = len(sw_by_idx)
     
     print('{} revs  '
-          #'{:.1f} chars/rev  '
+          #'{:.1f} words/rev  '
+          '{:.1f} words/rev  '
           '{:.1f}% pos  '
           '{} shared words  '.format(
         N,
-        #float(sum(len(r) for _,r in lines)/N),
+        #float(sum(len(r.split()) for _,r in lines)/N),
+        (float(sum(len(r.split())**2 for _,r in lines)/N))**0.5,
         100*float(sum(max(0,s) for s,_ in lines)/N),
         D,
         ))

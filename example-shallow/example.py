@@ -59,11 +59,11 @@ def overlay_color(background, foreground, foreground_opacity=1.0):
 
 #--------------  0.1.0. data preparation ---------------------------------------
 
-NB_TEST      =  900
-NB_TRAIN     =   50
-#NB_TRAIN     =  100
+NB_TEST      = 5000
+#NB_TRAIN     =   25
+NB_TRAIN     =  100
 NB_TRAIN_MAX = 5000
-BIAS = 0.5
+BIAS = 1.0
 
 #--------------  0.1.1. plotting and writing parameters  -----------------------
 
@@ -79,7 +79,7 @@ np.random.seed(0)
 
 #--------------  0.2.1. define artificial galaxy data  -------------------------
 
-sym  = lambda: 2.15*(np.random.random()-0.5)
+sym  = lambda: 2.50*(np.random.random()-0.5)
 sym3 = lambda: sym()*sym()*sym()
 choice = lambda l: l[np.random.choice(len(l))]
 
@@ -88,9 +88,9 @@ make_neg = lambda: choice([
     (1.0*sym (), 1.0*sym3()), 
     ])
 make_pos = lambda: choice([
-    (+0.6+2.*0.2*sym3(), +0.0+2.*0.8*sym3()),
-    (-0.3+2.*0.5*sym3(), +0.3+2.*0.5*sym3()),
-    (-0.3+2.*0.8*sym3(), -0.3+2.*0.2*sym3()),
+    (+0.6+1.0*0.2*sym3(), +0.0+1.0*0.8*sym3()),
+    (-0.3+1.0*0.5*sym3(), +0.3+1.0*0.5*sym3()),
+    (-0.3+1.0*0.8*sym3(), -0.3+1.0*0.2*sym3()),
     ])
 
 clip = lambda x: min(1, max(-1, x))
@@ -300,9 +300,9 @@ def get_train_stats(A, B, l2_reg):
             }
 
 
-def gradient_descend(nb_hiddens, learning_rate, nb_steps, report_every=None, batch_size=15, l2_reg=0.000):
+def gradient_descend(nb_hiddens, learning_rate, nb_steps, report_every=None, batch_size=5, l2_reg=0.000):
     # initialize:
-    A = np.random.randn(nb_hiddens)
+    A = np.random.randn(nb_hiddens)/np.sqrt(1+nb_hiddens)
     B = np.random.randn(nb_hiddens,3)/np.sqrt(nb_hiddens+3)
     print('training with '
             '\033[33m{:2d}\033[34m hiddens and '
@@ -313,8 +313,9 @@ def gradient_descend(nb_hiddens, learning_rate, nb_steps, report_every=None, bat
         # SGD UPDATE: 
         batch = np.random.choice(train_idxs, batch_size, replace=False)
         gA, gB, l = gradients(A,B, batch, l2_reg)
-        A -= 1.0 * learning_rate * gA * np.random.choice(2, gA.shape) 
-        B -= 1.0 * learning_rate * gB * np.random.choice(2, gB.shape)
+        lr = learning_rate #* (1.0 if t<nb_steps/2 else 0.2)
+        A -= 1.0 * lr * gA * np.random.choice(2, gA.shape) 
+        B -= 1.0 * lr * gB * np.random.choice(2, gB.shape)
          
         # report progress during training loop:
         if report_every is None or t%report_every: continue
@@ -333,25 +334,31 @@ def gradient_descend(nb_hiddens, learning_rate, nb_steps, report_every=None, bat
 
         # plot decision boundary etc
         #print('  plotting...'.format(nb_hiddens))
-        plot_features(
-            idxs=train_idxs,
-            dec_func = make_dec_func(A,B),
-            interesting_params = B,
-            ip_weights = A,
-            file_name='omdecfunc-{:03d}-{:05d}.png'.format(nb_hiddens,t),
-            opacity_factor=0.75,
-            ) 
+        #plot_features(
+        #    idxs=train_idxs,
+        #    dec_func = make_dec_func(A,B),
+        #    interesting_params = B,
+        #    ip_weights = A,
+        #    file_name='omdecfunc-{:03d}-{:05d}.png'.format(nb_hiddens,t),
+        #    opacity_factor=0.75,
+        #    ) 
 
     # return loss statistics
     return get_train_stats(A,B, l2_reg)
 
 print("hey, let's train!\033[34m")
 #for nb_hiddens in [1,2,3,5,8,13,21,34,55]:
-#for nb_hiddens in [4,8,16,32,64,128]:
-for nb_hiddens in [6,12]:
+#for nb_hiddens in [6,12]:
+#for nb_hiddens in [10,14]:
+#for nb_hiddens in [17,19]:
+#for nb_hiddens in [4,8,12,14,15,16,17,18,20,24,28,32]:
+#for nb_hiddens in [4,6,7,8,9,10,12,16,32]:
+#for nb_hiddens in [2,8,32,128,512]:#[8,12,16,24,32,48,64,96,128]:
+for nb_hiddens in [16]:#[8,12,16,24,32,48,64,96,128]:
+    #for _ in range(3): 
     metrics = gradient_descend(nb_hiddens    = nb_hiddens,
-                               learning_rate = 0.20,
+                               learning_rate = 5.0,
                                nb_steps      =25000+1,
-                               report_every  = 5000, 
-                              )
+                               report_every  = 1000, 
+                          )
 

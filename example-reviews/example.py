@@ -30,7 +30,7 @@
 from matplotlib import pyplot as plt                                            
 import numpy as np                                                              
 import tqdm
-from process_reviews import get_lines, get_shared_words, featurize
+from process_reviews import MAX_WORD_COUNT, get_lines, get_shared_words, featurize
 
 #--------------  0.2.1. colors  ------------------------------------------------
 
@@ -93,8 +93,6 @@ feat = lambda r: featurize(r, shared_words)
 test_lines = get_lines('reviews_test.tsv')
 
 #--------------  0.2.2. format data  ------------------------------------------- 
-
-
 
 #--------------  0.2.3. shuffle and split  -------------------------------------
 

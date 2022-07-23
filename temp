@@ -1,0 +1,22 @@
+
+o = ...
+e = np.exp(o)
+n = np.sum(e)
+p = e/n
+l = -np.log(p).dot(y)
+
+Question: dl/do = p-y?
+
+dl/dl = 1
+dl/dp_i = -y[i]/p[i]
+dl/dn   = sum_i of dl/dp_i * dp_i/dn
+        = sum_i of -y[i]/p[i] * (-e[i]/n^2)
+
+dl/de_i = dl/dp_i*dp_i/de_i + dl/dn      *dn/de_i
+                              dl/dp dp/dn dn/de
+
+dl/de_i = -y[i]/p[i] * (1/n) + -y[i]/p[i] * (-e[i]/n^2) * 1
+dl/do_i = e * (-y[i]/p[i] * (1/n) + -y[i]/p[i] * (-e[i]/n^2) * 1)
+        = e * (-y*n/e * 1/n) + e * (-y*n/e * (-e/n)/n) 
+          -y + y*p
+

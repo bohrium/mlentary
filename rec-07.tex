@@ -121,6 +121,7 @@
 %---------------------  0.2.0. general math operators  ------------------------
 \newcommand{\scirc}{\mathrel{\mathsmaller{\mathsmaller{\mathsmaller{\circ}}}}}
 \newcommand{\cmop}[2]{{(#1\!\to\!#2)}}
+\newcommand{\pr}{\prime}
 
 %---------------------  0.2.1. probability symbols  ---------------------------
 \newcommand{\KL}{\text{KL}}
@@ -226,12 +227,12 @@
     able to:\marginnote{%
     Our rough schedule is:
     \begin{description}
-        \item[\hspace{0.25cm}] \emph{19:30} neural nets: width and depth
-        \item[\hspace{0.25cm}] \emph{19:45} `to build a tool, use it'
-        \item[\hspace{0.25cm}] \emph{20:00} latent representations 
-        \item[\hspace{0.25cm}] \emph{20:15} symmetries
-        \item[\hspace{0.25cm}] \emph{20:30} rnns: backprop practice
-        \item[\hspace{0.25cm}] \emph{20:45} rnns: training 
+        \item[\hspace{0.25cm}] \emph{19:30} width and depth
+        \item[\hspace{0.25cm}] \emph{19:45} initialization, expressivity
+        \item[\hspace{0.25cm}] \emph{20:00} `to build a tool, use it'
+        \item[\hspace{0.25cm}] \emph{20:15} latent representations 
+        \item[\hspace{0.25cm}] \emph{20:30} symmetries
+        \item[\hspace{0.25cm}] \emph{20:45} rnns: `derivation', backprop practice 
         \item[\hspace{0.25cm}] \emph{21:00} 
     \end{description}
     }
@@ -240,7 +241,9 @@
                             dependencies
         \item[\hspace{1cm}] \emph{exploit} a task's symmetries to improve
                             generalization.
-        \item[\hspace{1cm}] \emph{train} an RNN to do basic sentiment analysis.
+        %\item[\hspace{1cm}] \emph{train} an RNN to do basic sentiment analysis.
+        \item[\hspace{1cm}] \emph{explain} the assumptions behind each design choice
+            leading to RNNs 
         %\item[\hspace{1cm}] \emph{initialize} weights to avoid stalled training 
             % TODO: also discuss bottlenecks / gradient boosts?
     \end{description}
@@ -350,9 +353,9 @@
         \exercise{}{What is the testing loss after a thousand SGD
         updates?}
 
-        Due to the pathology\marginnote{%
-          The nonconvexity of learning --- as evidenced by symmetries in the
-          model --- allows this pathology.  
+        Due to the pathology\bcirc \marginnote{%
+          \blarr The nonconvexity of learning --- as evidenced by permutation
+          symmetry of hidden features in the model --- allows this pathology.  
         }
         uncovered in the above exercises, we like to \emph{randomly} initialize
         our weights.
@@ -363,7 +366,17 @@
         vector $x$ by $h^1_j = \text{relu}\left(\sum_i C_{ji} x_i \right)$.  We
         assume that $D^1 \times D^0$ many matrix elements $C_{ji}$s are chosen
         independently according to some centered distribution with expected
-        absolute value $s$.   
+        absolute value $s$.
+        %%\marginnote{%
+        %%    \textbf{Technicalities}.  Let's assume a light-tailed distribution
+        %%    such as a normal distribution.  Note that the product of two
+        %%    independent normals with variances
+        %%    has a heavier, $\chi^2$ kind of tail.  Say the two normals have
+        %%    (mean, variance) $(0,v)$ and $(m,w)$, respectively.  Then the product
+        %%    has mean $0$ and variance 
+        %%    Still, the latter has zero mean and variance the product of the
+        %%    variances.
+        %%}
         %
         \exercise{}{If each $|x_i| \approx 1$ then each $|z^1_j| \approx$
         what?}
@@ -375,23 +388,31 @@
         h_j| \approx 1$ then each $|\partial \ell/\partial x_i| \approx$ what?}
 
         So for calibrated forward propagation, we might initialize each $C_{ji}$
-        to have scale roughly $\sqrt{2/D^0}$.
+        to have scale roughly $\sqrt{2/D^0}$.\bcirc\marginnote{%
+            \blarr Don't pay much heed to the constant factor $2$.
+        }
         %
         For calibrated backward propagation, we might initialize each $C_{ji}$
         to have scale roughly $\sqrt{2/D^1}$.
         %
-        We often use a compromise, named after \textbf{Glorot, Bengio, Xavier},
-        and probably others:
+        We often use a compromise:\bcirc\marginnote{%
+            \blarr This formula is named after \textbf{Glorot, Bengio, Xavier},
+            and probably others.  Don't pay much heed to the constant factor
+            $4$. 
+        }
         $$
             |C_{ji}| \approx \sqrt{\frac{4}{D^1+D^0}}
         $$
         For example, we can initialize by sampling $C_{ji}$ from a centered
         normal with variance $4/(D^1+D^0)$.  The tension between the forward
-        and backward scales is least when $D^1 \approx D^0$.\marginnote{%
-          This is a weak
+        and backward scales is least\bcirc when $D^1 \approx D^0$.\marginnote{%
+          \blarr This is a weak
           reason to favor gradual rather than abrupt changes in dimension across
           a neural network.  It's a weak reason because one could also counter
           this tension by using different learning rates for each layer.
+          %
+          In practice, adaptive methods such as ADAM automatically do the
+        latter.
         }
 
       %\samsubsubsection{learning rates}
@@ -400,10 +421,138 @@
       %  what?}
       %  %
 
+      %\newpage
+      \newcommand{\decade}[2]{
+          \includegraphics[width=0.099\textwidth]{#1-#20}%
+          \includegraphics[width=0.099\textwidth]{#1-#21}%
+          \includegraphics[width=0.099\textwidth]{#1-#22}%
+          \includegraphics[width=0.099\textwidth]{#1-#23}%
+          \includegraphics[width=0.099\textwidth]{#1-#24}%
+          \includegraphics[width=0.099\textwidth]{#1-#25}%
+          \includegraphics[width=0.099\textwidth]{#1-#26}%
+          \includegraphics[width=0.099\textwidth]{#1-#27}%
+          \includegraphics[width=0.099\textwidth]{#1-#28}%
+          \includegraphics[width=0.099\textwidth]{#1-#29}\\%
+      }
       \samsubsubsection{expressivity}
+        Both \textbf{wider} and \textbf{deeper} neural nets (more
+        hidden features per hidden layer; more hidden layers) have more supple
+        decision boundaries than smaller neural nets.  We can ``spend''
+        parameters on increased width or increased depth: both add complexity,
+        much like increasing the regularization weakness $C=1/\lambda$.
+        %
+        Intuitively, increasing width is like enriching a child's vocabulary
+        while increasing depth is like enriching a child's grammar.  The
+        question \emph{Would the cow have helped its kin had not that act been
+        what we loved?} consists of simple, one-syllable words but expresses a
+        pretty sophisticated idea.
 
-        \exercise{}{}
-        \exercise{}{}
+        %It's more realistic to consider high dimensional inputs.
+        %
+        So let's
+          consider a neural network $\mathcal{N}$ with one hidden layer and with
+          layer dimensions $(1 \leftarrow 30 \leftarrow 100)$.
+          This has roughly $3000$ many parameters.
+          %
+          By contrast, we could try a network $\mathcal{N}^\pr$ with two hidden layers
+          and with layer dimensions $(1 \leftarrow 25 \leftarrow 25 \leftarrow
+          100)$.  This also has roughly $3100$ many parameters.
+          %
+        Which of these decision boundaries can $\mathcal{N}^\pr$ approximate
+        much better than $\mathcal{N}$?
+        \exercise{}{%
+            ...recognizing whether a given $10\times 10$ handwritten ASCII
+            character (dark ink on light paper) belongs to the set
+            \texttt{0123456789}
+            %\texttt{)!@\#\$\%\textasciicircum\&*(}
+            %\texttt{ABCDEFGHIJKLM}
+            %\texttt{NOPQRSTUVWXYZ}
+            %\texttt{abcdefghijklm}
+            %\texttt{nopqrstuvwxyz}
+            %of standard english characters.
+            of standard arabic numerals.
+        }
+        \exercise{}{%
+            ...recognizing whether a given $10\times 10$ bit matrix has
+            all rows the same.
+        }
+        \exercise{}{%
+            ...recognizing whether a given $10\times 10$ bit matrix has no 
+            two rows the same.
+        }
+        \exercise{}{%
+            ...recognizing whether the input lies within the $100$-dimensional 
+            unit ball.
+        }
+
+        The above four exercises are written pretty vaguely.  They're just to 
+        get us thinking about the geometry of depth.  Exam questions will of
+        course be dramatically more precisely posed.
+
+        %
+        \newpage
+        The following unfairly difficult exercise invites us to consider how
+        depth and width affect expressivity.  Unlike the previous exercise, it
+        fails to illustrate typical behaviors visible only in high dimensions.
+
+        \exercise{}{(Unfair but educational).  The following four collections
+        of images show decision boundaries from randomly initializations of
+        four architectures.  The hidden dimensions are $(4), (64), (4,64),
+        (64,4)$.  Match architectures to collections.}
+        \begin{figure}[h]
+          \centering%
+            \decade{example-shallow/sketch-2-004}{00}%
+            \decade{example-shallow/sketch-2-004}{01}%
+            %
+            ~\\
+            %
+            \decade{example-shallow/sketch-2-064}{00}%
+            \decade{example-shallow/sketch-2-064}{01}%
+            %
+            ~\\
+            %
+            \decade{example-shallow/sketch-3-064-004}{00}%
+            \decade{example-shallow/sketch-3-064-004}{01}%
+            %
+            ~\\
+            %
+            \decade{example-shallow/sketch-3-004-064}{00}%
+            \decade{example-shallow/sketch-3-004-064}{01}%
+          \caption{%
+              \textbf{Four collections of decision boundaries}.  Each
+              collection shows boundaries for twenty random initializations of
+              one of four architecture.  Each plot shows ten by ten unit
+              squares with the origin at center.
+            %
+            %
+            \textbf{Top rows}:
+            decision boundaries are jagged polygons with edges long and angles moderate. 
+            The boundaries show almost no oscillation in their direction of curvature:
+            counterclockwise turns are never quickly followed by clockwise turns. 
+            The displayed plane tends to be cut into one or two pieces. 
+            %
+            \textbf{Center top rows}:
+            decision boundaries are smooth curves with edges short and angles small. 
+            The boundaries show little oscillation in their direction of
+            curvature: counterclockwise turns are usually not quickly followed
+            by clockwise turns. 
+            The displayed plane tends to be cut into one or two pieces. 
+            %
+            \textbf{Center bottom rows}:
+            decision boundaries are jagged curves with edges short and angles sometimes small and often large. 
+            The boundaries show much oscillation in their direction of
+            curvature: counterclockwise turns are often quickly followed by
+            clockwise turns. 
+            The displayed plane tends to be cut into two or three (up to five) pieces. 
+            %
+            \textbf{Bottom rows}:
+            decision boundaries are smoothed polygons with edges short and angles usually small and occasionally large.
+            The boundaries show moderate oscillation in their direction of
+            curvature: counterclockwise turns are sometimes quickly followed by
+            clockwise turns. 
+            The displayed plane tends to be cut into two or three (up to four) pieces. 
+          }
+        \end{figure}
 
       \samsubsubsection{hyperparameters affect generalization}
 
@@ -423,30 +572,47 @@
     \samsubsection{wishful thinking}
 
       \samsubsubsection{to build a tool, use it}
+        sam draws stuff
+
       \samsubsubsection{architecture, depth, hierarchy}
+        sam draws stuff
+
       \samsubsubsection{latent representations}
+        sam draws stuff
 
-    \newpage
-    \samsubsection{exploiting symmetry through...}
+      \samsubsubsection{exploiting symmetry}
+        Let's help our machine not re-invent the wheel.
 
-      Let's help our machine not re-invent the wheel.
+        \textbf{data augmentation}
 
-      \samsubsubsection{...data augmentation}
-      \samsubsubsection{...canonicalization}
-      \samsubsubsection{...data abstraction}
-      \samsubsubsection{...equivariant architecture}
+        \textbf{canonicalization}
+
+        \textbf{data abstraction}
+
+        \textbf{equivariant architecture}
+
+        sam draws stuff
 
     \newpage
     \samsubsection{example: recurrent neural networks}
 
       \samsubsubsection{locality and symmetry: 1d cnn}
+      sam draws stuff
+
       \samsubsubsection{latents and dependencies: rnn}
+      sam draws stuff
+
+      \samsubsubsection{memory activation functions}
+      sam draws stuff
+
       \samsubsubsection{forward pass}
+      sam draws stuff
+
       \samsubsubsection{backward pass}
+      sam draws stuff
 
     %\samsubsection{a sneak peak at creative losses} 
       %\samsubsubsection{generation via deconvolution}
       %\samsubsubsection{an example: pix2pix}
 
 \end{document}
-
