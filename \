@@ -204,8 +204,7 @@
 %=====  1.  PROLOGUE  =========================================================
 %==============================================================================
 
-\begin{document}%\samtitle{optional 6.86x notes}
-                \samtitle{mlentary: basics of machine learning}
+\begin{document}\samtitle{optional 6.86x notes}
 
   \marginnote[0cm]{%
     \textsc{Clickable Table of Contents}\vspace{0.05cm}
@@ -221,13 +220,11 @@
       \item[H. math refresher]              \phdot  \pageref{chap:math}
     \end{description}
   }
-  These are optional notes for 6.86x. 
-  %\attn{You do not need to read these notes at all} to get an A in this course;
-  %conversely, \attn{you may not cite these notes} when solving homework or
-  %exams.
-  Depending on your interests, you might want to start at chapter A (then
-  BCDEF) or D (then ABCEF).  Sample chapters G, H (review of some but not all
-  prerequisites) as needed.
+  \attn{You do not need to read these notes at all} to get an A in this course;
+  conversely, \attn{you may not cite these notes} when solving homework or
+  exams.  Depending on your interests, you might
+  want to start at chapter A (then BCDEF) or D (then ABCEF).
+  Sample chapters G, H (review of some but not all prerequisites) as needed.
   %
   
   \samchapter{A. prologue}\label{chap:prologue}
@@ -1201,46 +1198,9 @@
 %~~~~~~~~~~~~~  2.8. on overfitting  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
       \sampassage{on overfitting}
-        In the Bayesian framework, we optimistically assume that our model is
-        ``correct'' and that the ``true'' posterior over parameters is
-        $$
-            p(w|y;x) = p(y|w;x) p(w) / Z_x 
-        $$
-        a normalized product of likelihood and prior.
-        %
-        Therefore, our optimal guess for a new prediction is:
-        $$
-            p(y_\star;x_\star, x)
-            = \sum_w p(y_\star|w;x_\star) p(y|w;x) p(w) / Z_x 
-        $$
-
-        For computational tractability, we typically approximate the posterior
-        over hypotheses by a point mass at the posterior's mode
-        $\text{argmax}_{w^\prime} p(w^\prime|y;x)$:
-        $$
-            p(w|y,x) \approx \delta(w - w^\star(y,x))
-            \quad\quad
-            w^\star(y,x)=\text{argmax}_{w^\prime} p(w^\prime|y;x)
-        $$
-        Then
-        $$
-            p(y_\star;x_\star, x)
-            \approx p(y_\star|w^\star(y,x);x_\star)
-        $$
-
-        What do we lose in this approximation?
-
         \attnsam{$\Ee$ and $\max$ do not commute}
-
-        \attnsam{PICTURE: ``bowtie'' vs ``pipe''}
-
-        \attnsam{BIC for relevant variables}
-
-
-        %\attnsam{point estimates vs bayesian decision theory}
-
-        %\attnsam{interpolation does not imply overfitting}
-
+        \attnsam{point estimates vs bayesian decision theory}
+        \attnsam{interpolation does not imply overfitting}
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~  2.9. log priors and bayes  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1251,44 +1211,6 @@
         \attnsam{$\ell^p$ regularization; sparsity}
         \attnsam{eye regularization example!}
         \attnsam{TODO: rank as a prior (for multioutput models)}
-
-        %The so-called $\ell^p$ priors are popular.  For $1\leq p<\infty$,
-        %these are defined by:
-        For $1\leq p\leq \infty$ and $1\leq q\leq \infty$ we can consider this prior:\bovinenote{%
-          To define the cases $p=\infty$ or $q=\infty$ we take limits.
-          To define the case $p=\infty=q$ we take limits while maintaining $p=q$. 
-        }
-        $$    
-            p(w) \propto \exp\left(-\left(\sum_i |\lambda w_i|^p\right)^{q/p}\right)
-        $$
-        For $q=p$ this decomposes as a sum and thus has each coordinate
-        independent.  Whereas $q$ limits outliers, $p$ controls the shape of
-        level curves.  Small $q$ makes large vectors more probable and
-        small $p$ makes it more probable that the entries within a vector will
-        be of very different sizes.
-        \begin{table}
-            \centering
-            \begin{tabular}{ccccccc}
-                p         &       q         &  sample A          &  sample B          &   shape       & indep.?       & outliers    \\\hline% sample A            sample B         
-                $1     $  &       $1$       & $( 0.5,-0.1, 0.7)$ & $(14.4,-0.9,-0.9)$ & octahedron    & $\checkmark$  & many        \\      %$( 0.6, 0.1, 0.9)$  $( 1.6, 0.1, 0.1)$
-                $1     $  &       $2$       & $( 0.6,-0.1, 0.9)$ & $( 4.8,-0.3,-0.3)$ & octahedron    &               & few         \\      %$( 0.6, 0.1, 0.9)$  $( 1.6, 0.1, 0.1)$
-                $1     $  &       $\infty$  & $( 0.7,-0.1, 1.1)$ & $( 1.6,-0.1,-0.1)$ & octahedron    &               & none        \\      %$( 0.6, 0.1, 0.9)$  $( 1.6, 0.1, 0.1)$
-                $2     $  &       $1$       & $( 0.3,-0.2, 0.8)$ & $(13.5,-7.2,-2.7)$ & sphere        &               & many        \\      %$( 0.4, 0.2, 1.0)$  $( 1.5, 0.8, 0.3)$
-                $2     $  &       $2$       & $( 0.4,-0.2, 1.0)$ & $( 4.5,-2.4,-0.9)$ & sphere        & $\checkmark$  & few         \\      %$( 0.4, 0.2, 1.0)$  $( 1.5, 0.8, 0.3)$
-                $2     $  &       $\infty$  & $( 0.5,-0.2, 1.2)$ & $( 1.5,-0.8,-0.3)$ & sphere        &               & none        \\      %$( 0.4, 0.2, 1.0)$  $( 1.5, 0.8, 0.3)$
-                $\infty$  &       $1$       & $( 0.4,-0.2, 0.7)$ & $( 9.0,-8.1,-7.2)$ & cube          &               & many        \\      %$( 0.5, 0.3, 0.9)$  $( 1.0, 0.9, 0.8)$
-                $\infty$  &       $2$       & $( 0.5,-0.3, 0.9)$ & $( 3.0,-2.7,-2.4)$ & cube          &               & few         \\      %$( 0.5, 0.3, 0.9)$  $( 1.0, 0.9, 0.8)$
-                $\infty$  &       $\infty$  & $( 0.6,-0.4, 1.1)$ & $( 1.0,-0.9,-0.8)$ & cube          & $\checkmark$  & none        \\      %$( 0.5, 0.3, 0.9)$  $( 1.0, 0.9, 0.8)$
-            \end{tabular}
-        \end{table}
-        %\begin{description}
-        %    \item[$(p,q)=(1     ,1)$ --- indep laplacian        ]
-        %    \item[$(p,q)=(1     ,2)$ ---                        ]
-        %    \item[$(p,q)=(2     ,1)$ ---                        ]
-        %    \item[$(p,q)=(2     ,2)$ --- indep\&radial gaussian ]
-        %    \item[$(p,q)=(\infty,1)$ ---                        ]
-        %    \item[$(p,q)=(\infty,2)$ ---planckian               ]
-        %\end{description}
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~  2.10. hierarchy, mixtures, transfer  ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1543,8 +1465,8 @@
 
       \sampassage{sketching}
       \sampassage{}
+      \sampassage{}
       \sampassage{sensitivity analysis} % multiple layers, differentiation
-      \sampassage{double descent}
 
     \samsection{1. learned featurizations} 
       \sampassage{imagining the space of feature tuples}
@@ -2246,8 +2168,8 @@
 
         The dot product is defined as follows.  Say there are $D$ axes and that
         the "unit" vectors along each axis (aka the basis vector) are named
-        $(v_i:0\leq i<D)$.  Then we define $P(v_j)(v_i) = (1 \text{ if } i=j
-        \text{ else } 0)$ --- the $1$ expresses that each "unit" basis vector
+        $(v)i:0\leq i<D)$.  Then we define $P(v_j)(v_i)=1 \text{if} i=j
+        \text{else} 0$ --- the $1$ expresses that each "unit" basis vector
         ought to have length $1$.  The $0$ expresses that different basis
         vectors ought to be at right angles to each other.  This determines $P$
         on all inputs, by linearity: $P(\sum c^\pr_j v_j)(\sum c_i v_i)=\sum_i
@@ -2291,6 +2213,12 @@
       Throughout this section, $X$ and $Y$ will refer to two normed real 
       vector spaces of finite dimension.
 
+      \sampassage{asymptotic notation}
+        When analyzing algorithms or data, we often wish to consider extremes
+        of the very small or the very large.  Such thought experiments isolate
+        how behaviors of interest depend on the variables we take to extreme
+        values.
+
       \sampassage{asymptotic notation}                                          
         When analyzing algorithms or data, we often wish to consider extremes   
         of the very small or the very large.  Such thought experiments isolate  
@@ -2299,7 +2227,7 @@
                                                                                 
         We say \textbf{$f:X\to Y$ is negligible compared to $g:X\to Y$          
         for sufficiently small\bovinenote{%                                     
-          The notion that ``\emph{$f$ is negligible compared to $g$ for
+          The notion of ``\emph{$f$ is negligible compared to $g$ for
           sufficiently small inputs}'' is the most important of a $2\times 2$
           grid of variants: 
           we may change
@@ -2319,9 +2247,8 @@
               &\text{``There exists a positive number $\epsilon$''}
           \end{align*}
           %
-          The class of $f$s that never ovewhelm $g$ is called $O(g)$ --- pronounced
-          \textbf{big-Oh}.  Clearly, $o(g) \subsetneq O(g)$.
-          Confusingly, folks use the same notation $o(g), O(g)$
+          The class of $f$ that never ovewhelm $g$ is called $O(g)$ --- pronounced
+          \textbf{big-Oh}.  Confusingly, we use the same notation $o(g), O(g)$
           when considering small inputs and large inputs;
           which sense we mean should be clear from context.
         } inputs}
@@ -2332,7 +2259,7 @@
             &\hspace{2cm}\text{whenever $0<\|x\|<\delta$,}\\
             &\hspace{3cm}\text{we also have $\|f(x)\| < \epsilon \|g(x)\|$.}
         \end{align*}
-        The class of $f$s that are negligible compared to $g$ we denote by
+        The class of all such $f$s we denote by
         $$
             o(g)
         $$
@@ -2374,7 +2301,7 @@
         approximation to be good for small $h$ in the sense that the error
         vanishes faster than linearly as $h$ shrinks:
         $$
-            \|f(x) + (Df_x)(h) - f(x+h)\| \in o(\|h\|) 
+            f(x) + (Df_x)(h) - f(x+h) \in o(\|h\|) 
         $$
         Intuitively, $Df_x$ exists when $f$ varies smoothly.
 
