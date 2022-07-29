@@ -31,6 +31,8 @@
 \newcolumntype{C}{>{$}c<{$}} % math-mode version of "c" column type
 \newcolumntype{R}{>{$}r<{$}} % math-mode version of "r" column type
 
+\newcolumntype{S}{ >{\centering\arraybackslash} m{3cm} } % vertically and horizontally centered
+
 %---------------------  0.0.2. graphics packages  -----------------------------
 \usepackage{graphicx, xcolor}
 \usepackage{float, capt-of}
@@ -1266,21 +1268,33 @@
         level curves.  Small $q$ makes large vectors more probable and
         small $p$ makes it more probable that the entries within a vector will
         be of very different sizes.
+        \newcommand{\priors}[1]{\includegraphics[width=2.9cm]{priors/yo-#1}}
+        \newcommand{\smarsh}[1]{\vspace{0.125cm}\smash{\parbox[c]{3cm}{#1}}\vspace{0.525cm}}
         \begin{table}
-            \centering
-            \begin{tabular}{ccccccc}
-                p         &       q         &  sample A          &  sample B          &   shape       & indep.?       & outliers    \\\hline% sample A            sample B         
-                $1     $  &       $1$       & $( 0.5,-0.1, 0.7)$ & $(14.4,-0.9,-0.9)$ & octahedron    & $\checkmark$  & many        \\      %$( 0.6, 0.1, 0.9)$  $( 1.6, 0.1, 0.1)$
-                $1     $  &       $2$       & $( 0.6,-0.1, 0.9)$ & $( 4.8,-0.3,-0.3)$ & octahedron    &               & few         \\      %$( 0.6, 0.1, 0.9)$  $( 1.6, 0.1, 0.1)$
-                $1     $  &       $\infty$  & $( 0.7,-0.1, 1.1)$ & $( 1.6,-0.1,-0.1)$ & octahedron    &               & none        \\      %$( 0.6, 0.1, 0.9)$  $( 1.6, 0.1, 0.1)$
-                $2     $  &       $1$       & $( 0.3,-0.2, 0.8)$ & $(13.5,-7.2,-2.7)$ & sphere        &               & many        \\      %$( 0.4, 0.2, 1.0)$  $( 1.5, 0.8, 0.3)$
-                $2     $  &       $2$       & $( 0.4,-0.2, 1.0)$ & $( 4.5,-2.4,-0.9)$ & sphere        & $\checkmark$  & few         \\      %$( 0.4, 0.2, 1.0)$  $( 1.5, 0.8, 0.3)$
-                $2     $  &       $\infty$  & $( 0.5,-0.2, 1.2)$ & $( 1.5,-0.8,-0.3)$ & sphere        &               & none        \\      %$( 0.4, 0.2, 1.0)$  $( 1.5, 0.8, 0.3)$
-                $\infty$  &       $1$       & $( 0.4,-0.2, 0.7)$ & $( 9.0,-8.1,-7.2)$ & cube          &               & many        \\      %$( 0.5, 0.3, 0.9)$  $( 1.0, 0.9, 0.8)$
-                $\infty$  &       $2$       & $( 0.5,-0.3, 0.9)$ & $( 3.0,-2.7,-2.4)$ & cube          &               & few         \\      %$( 0.5, 0.3, 0.9)$  $( 1.0, 0.9, 0.8)$
-                $\infty$  &       $\infty$  & $( 0.6,-0.4, 1.1)$ & $( 1.0,-0.9,-0.8)$ & cube          & $\checkmark$  & none        \\      %$( 0.5, 0.3, 0.9)$  $( 1.0, 0.9, 0.8)$
-            \end{tabular}
+          \centering
+          \begin{tabular}{m{1.1cm}SSS}%
+                                & $q=1$                 & $q=2$                 & $q=\infty$              \\%
+            \smarsh{     $p=1$} &\smarsh{\priors{1-1}}  &\smarsh{\priors{1-2}}  &\smarsh{\priors{1-inf}}  \\%
+            \smarsh{     $p=2$} &\smarsh{\priors{2-1}}  &\smarsh{\priors{2-2}}  &\smarsh{\priors{2-inf}}  \\%
+            \smarsh{$p=\infty$} &\smarsh{\priors{inf-1}}&\smarsh{\priors{inf-2}}&\smarsh{\priors{inf-inf}}\\%
+          \end{tabular}
         \end{table}
+
+        %\begin{table}
+        %    \centering
+        %    \begin{tabular}{ccccccc}
+        %        p         &       q         &  sample A          &  sample B          &   shape       & indep.?       & outliers    \\\hline% sample A            sample B         
+        %        $1     $  &       $1$       & $( 0.5,-0.1, 0.7)$ & $(14.4,-0.9,-0.9)$ & octahedron    & $\checkmark$  & many        \\      %$( 0.6, 0.1, 0.9)$  $( 1.6, 0.1, 0.1)$
+        %        $1     $  &       $2$       & $( 0.6,-0.1, 0.9)$ & $( 4.8,-0.3,-0.3)$ & octahedron    &               & few         \\      %$( 0.6, 0.1, 0.9)$  $( 1.6, 0.1, 0.1)$
+        %        $1     $  &       $\infty$  & $( 0.7,-0.1, 1.1)$ & $( 1.6,-0.1,-0.1)$ & octahedron    &               & none        \\      %$( 0.6, 0.1, 0.9)$  $( 1.6, 0.1, 0.1)$
+        %        $2     $  &       $1$       & $( 0.3,-0.2, 0.8)$ & $(13.5,-7.2,-2.7)$ & sphere        &               & many        \\      %$( 0.4, 0.2, 1.0)$  $( 1.5, 0.8, 0.3)$
+        %        $2     $  &       $2$       & $( 0.4,-0.2, 1.0)$ & $( 4.5,-2.4,-0.9)$ & sphere        & $\checkmark$  & few         \\      %$( 0.4, 0.2, 1.0)$  $( 1.5, 0.8, 0.3)$
+        %        $2     $  &       $\infty$  & $( 0.5,-0.2, 1.2)$ & $( 1.5,-0.8,-0.3)$ & sphere        &               & none        \\      %$( 0.4, 0.2, 1.0)$  $( 1.5, 0.8, 0.3)$
+        %        $\infty$  &       $1$       & $( 0.4,-0.2, 0.7)$ & $( 9.0,-8.1,-7.2)$ & cube          &               & many        \\      %$( 0.5, 0.3, 0.9)$  $( 1.0, 0.9, 0.8)$
+        %        $\infty$  &       $2$       & $( 0.5,-0.3, 0.9)$ & $( 3.0,-2.7,-2.4)$ & cube          &               & few         \\      %$( 0.5, 0.3, 0.9)$  $( 1.0, 0.9, 0.8)$
+        %        $\infty$  &       $\infty$  & $( 0.6,-0.4, 1.1)$ & $( 1.0,-0.9,-0.8)$ & cube          & $\checkmark$  & none        \\      %$( 0.5, 0.3, 0.9)$  $( 1.0, 0.9, 0.8)$
+        %    \end{tabular}
+        %\end{table}
         %\begin{description}
         %    \item[$(p,q)=(1     ,1)$ --- indep laplacian        ]
         %    \item[$(p,q)=(1     ,2)$ ---                        ]
