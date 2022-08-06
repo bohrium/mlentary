@@ -119,8 +119,8 @@ class World:
         (dr, dc), water_action = a 
         reward = 0.0
 
-        if self.holding_water:
-            reward += + 0.1 # fun to hold water
+        #if self.holding_water:
+        #    reward += + 0.1 # fun to hold water
 
         # water
         if water_action:
@@ -130,11 +130,11 @@ class World:
             elif self.holding_water:
                 self.holding_water = False
                 if self.position == self.__frn__:
-                    reward += + 5.0 # watered fern
+                    reward += +10.0 # watered fern
                 elif self.position == self.__chg__:
-                    reward += -10.0 # watered charger
+                    reward += -50.0 # watered charger
                 else:
-                    reward += - 0.1 # spilled water
+                    reward += - 0.5 # spilled water
 
         # locomotion
         r, c = (self.position[0]+dr, self.position[1]+dc) 
@@ -149,12 +149,12 @@ class World:
                 reward += - 0.1 # overcharged
             self.charge = min(3, self.charge+1) 
             if self.holding_water:
-                reward += - 0.1 # charging while holding water
+                reward += - 0.5 # charging while holding water
         elif np.random.random() < self.PROB_LOSE_CHARGE:
             self.charge = max(0, self.charge-1) 
 
         if self.charge == 0:
-            reward += - 0.2     # cost of using backup battery
+            reward += - 0.5     # cost of using backup battery
 
         self.steps_elapsed += 1 
         self.total_reward = reward + self.GAMMA * self.total_reward  
@@ -168,31 +168,41 @@ class World:
             self.perform_action(action)
         return self.total_reward
 
-    def q_learn(self, policy, nb_lives, nb_steps_per_life, learning_rate=0.5, epsilon=0.5):
-        q_table = {(s,a):0.0 for s in self.STATES for a in self.ACTIONS}
+    def q_learn(self, policy, nb_lives, nb_steps_per_life, learning_rate=0.5, epsilon=0.5, optimism=1.0, curiosity=1.0):
+        q_table = {(s,a):optimism for s in self.STATES for a in self.ACTIONS}
 
         for l in tqdm.tqdm(range(nb_lives)):
+            q_table_pseudo = {(s,a):q_table[(s,a)] for s in self.STATES for a in self.ACTIONS}
+            #q_table_pseudo = {(s,a):1.0 for s in self.STATES for a in self.ACTIONS}
+
+            pseudo_goals = set([
+                    list(self.STATES)[np.random.choice(len(self.STATES))]
+                    for _ in range(10)
+                    ])
+
             self.reset()
 
-            #self.print_verbose()
-            #self.reset_cursor_after_print_verbose()
-
-            #for t in tqdm.tqdm(range(nb_steps_per_life)):
             for t in (range(nb_steps_per_life)):
-                #input()
                 state = self.state()
-                action = policy(state) if np.random.random() < epsilon else (max((q_table[(state,a)], a) for a in self.ACTIONS)[1])
+                action = policy(state) if np.random.random() < epsilon else (max((q_table_pseudo[(state,a)], a) for a in self.ACTIONS)[1])
+                #action = policy(state) if np.random.random() < epsilon else (max((q_table[(state,a)], a) for a in self.ACTIONS)[1])
                 r = self.perform_action(action)
 
-                #W.print_verbose()
-                #print('just performed {}'.format(action), end='')
-                #W.reset_cursor_after_print_verbose()
-
                 new_state = self.state()
+
                 q_table[(state,action)] += learning_rate * (
                     r + self.GAMMA * max(q_table[(new_state,a)] for a in self.ACTIONS)
                     - q_table[(state,action)]
                 )
+
+                if new_state in pseudo_goals:
+                    r += curiosity
+
+                q_table_pseudo[(state,action)] += learning_rate * (
+                    r + self.GAMMA * max(q_table_pseudo[(new_state,a)] for a in self.ACTIONS)
+                    - q_table_pseudo[(state,action)]
+                )
+
         return q_table
 
 W = World()
@@ -204,7 +214,7 @@ print('{} many states'.format(len(S)))
 def uniform_policy(state):
     return A[np.random.choice(len(A))]
 
-q_table = W.q_learn(uniform_policy, 1000, 1000)
+q_table = W.q_learn(uniform_policy,  3000,  300)
 
 def policy_from_table(state):
     return max((q_table[(state,a)], a) for a in W.ACTIONS)[1]
