@@ -1,5 +1,5 @@
 % author:   sam tenka
-% change:   2022-07-23
+% change:   2022-07-29
 % create:   2022-05-11
 
 %==============================================================================
@@ -728,7 +728,8 @@
 %====  2.  LINEAR MODELS BASICS  =============================================
 %==============================================================================
 
-  \samchapter{B. linear models}\label{chap:linear}
+  %\samchapter{B. linear models}\label{chap:linear}
+  \samchapter{B. linear classification}\label{chap:linear}
 
     \samsection{0. linear approximations} 
       \samquote{
@@ -1117,11 +1118,11 @@
             \text{formula}              &\log_2(1+e^{(\cdot)})&\max(1,\cdot)+1            &\max(1,\cdot+1)            & ??                        \\       %&(\cdot+1)^2                    
             \text{update}               &1/(1+e^{+yd})        &\text{step}(-yd)           &\text{step}(1-yd)          & ??                        \\\hline %&2(1-yd)                        
             %                                                                                                                                                %                                
-            \text{outliers}             &\text{vulnerable}      &\text{robust}              &\text{robust}              &\text{vulnerable}          \\       %&\text{vulnerable}              
-            \text{inliers}              &\text{sensitive}       &\text{blind}               &\text{sensitive}           &\text{blind}               \\       %&\text{blind}                   
-            \text{humility}             &\text{low}             &\text{low}                 &\text{high}                &\text{high}                   
+            \text{outliers}             &\text{robust-ish}      &\text{robust}              &\text{robust}              &\text{vulnerable}          \\       %&\text{vulnerable}              
+            \text{inliers}              &\text{sensitive}       &\text{blind}               &\text{sensitive}           &\text{blind-ish}           \\       %&\text{blind}                   
+            \text{humility}             &\text{low}             &\text{low}                 &\text{high-ish}            &\text{high}                \\ 
+            \text{acc bnd}              &\text{good}            &\text{bad}                 &\text{good}                &\text{good-ish}                 
             %\text{humility}             &\text{low}             &\text{medium}              &\text{high}                \\             % &\text{high}                   
-            %\text{acc bnd}              &\text{good}            &\text{bad}                 &\text{good}                \\             % &\text{medium}                 
             % TODO: split outliers/inliers by good or bad (erroneously classified or not?)  so 4 rows instead of 2?
           \end{tabular}
           \caption{%
@@ -1362,18 +1363,20 @@
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~  2.17. dimension bound  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      \sampassage{hypothesis-class-based bounds}
+      %\sampassage{hypothesis-class-based bounds}
+      \sampassage{hypothesis-geometry bounds}
         Suppose we are doing binary linear classification with $N$ training
-        samples of dimension $d$.  Then with probability at least $1-\delta$
+        samples of dimension $d< N$.  Then with probability at least $1-\eta$
         the gen gap is at most:
         %\bcirc\marginnote{%
-        %    \blarr we write $a^\cdot, a^{\cdot\cdot}$ for $(a+1), (a+2)$ to
-        %    avoid overemphasizing annoying constants.
+        %    %\blarr We write $\log_{\!+}(z)$ for $\log(\max(1,z))$.
+        %    %\blarr we write $a^\cdot, a^{\cdot\cdot}$ for $(a+1), (a+2)$ to
+        %    %avoid overemphasizing annoying constants.
         %}
         $$
-          \sqrt{\frac{d\log(6N/d) + \log(4/\delta)}{N}}
+          \sqrt{\frac{d\log(6N/d) + \log(4/\eta)}{N}}
         $$
-        For example, with $d=16$ features and tolerance $\delta=1/1000$, we
+        For example, with $d=16$ features and tolerance $\eta=1/1000$, we
         can achieve a gen.\ gap of less than $5\%$ once we have more than
         $N\approx 64000$ samples.  This is pretty lousy.  It's a worst case
         bound in the sense that it doesn't make any assumptions about how
@@ -1387,11 +1390,11 @@
 
         \attnsam{CHECK ABOVE!}
 
-        In particular, with chance at least $1-\delta$:
+        Thus, if $R=1$ and $1 \leq Nm$ then with chance at least $1-\eta$:
         \begin{align*}
-            \text{testing error} \leq &~\frac{\text{(number of support vectors)}}{N}
+            \text{testing error} \leq &~\frac{\text{(number of margin violators)}}{N}
           +\\
-            &~\sqrt{\frac{\lceil 1+(R/m)^2 \rceil\log(6N/\lceil 1+(R/m)^2 \rceil) + \log(4/\delta)}{N}}
+            &~\sqrt{\frac{(2/m^2) \log(6N m^2) + \log(4/\eta)}{N}}
         \end{align*}
 
         \attnsam{dimension/margin}
@@ -1399,7 +1402,7 @@
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~  2.18. margin bound  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      \sampassage{data-based bounds}
+      \sampassage{optimization-based bounds}
         Another way to estimate testing error is through \textbf{leave-one-out
         cross validation} (LOOCV).  This requires sacrifice of a single
         training point in the sense that we need $N+1$ data points to do LOOCV
@@ -1426,7 +1429,7 @@
         assumption are independent.
 
         If all $x$s, train or test, have length at most $R$, then
-        we have that with chance at least $1-\delta$: 
+        we have that with chance at least $1-\eta$: 
         $$
             \Ee_{\sS}
             \text{testing error}
@@ -1434,7 +1437,7 @@
             \Ee_{\sS}
             \text{LOOCV error}
             +
-            \sqrt{\frac{1+6R^2/\lambda}{2N\delta}}
+            \sqrt{\frac{1+6R^2/\lambda}{2N\eta}}
         $$
 
         %together with the
