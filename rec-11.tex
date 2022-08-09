@@ -1,5 +1,5 @@
 % author:   sam tenka
-% change:   2022-08-06
+% change:   2022-08-09
 % create:   2022-08-06
 
 %==============================================================================
@@ -25,6 +25,7 @@
 \usepackage{amsmath, amssymb, amsthm, mathtools}
 \usepackage{bm}
 \usepackage{euler}
+\usepackage{tikz-cd}
 
 \usepackage{array}   % for \newcolumntype macro
 \newcolumntype{L}{>{$}l<{$}} % math-mode version of "l" column type
@@ -211,9 +212,17 @@
 \begin{document}
   \samtitle{recitation 11}
       
-  \samsection{reinforcement}
-    \samsubsection{bird's eye view}
-      \samsubsubsection{kinds of learning}
+  \samsection{classical reinforcement learning}
+    In the 
+
+    Today we'll learn how to solve classical reinforcement learning problems. 
+    Compared to by-now supervised learning
+
+    motivating real-world examples
+    include robotics, poker, and ad placement.
+
+    \samsubsection{kinds of learning}
+      %\samsubsubsection{kinds of learning}
         How do we communicate patterns of desired behavior?  We can teach:\footprint
         \begin{description}
           \item[\textbf{by instruction}:  ]  ``to tell whether a mushroom is poisonous, first look at its gills...'' 
@@ -222,14 +231,15 @@
         \end{description}
         %
         Machine learning is the art of programming computers to learn from such
-        sources.  We've so far focused on the most important case: learning from
-        examples.  
-        Learning by example is key to
-          the other modes of learning.
-        Today we'll discuss learning by reinforcement.
+        sources.  We've so far focused on the most important case: learning
+        from examples.  
 
-        Motivating real-world examples include robotics, poker, and ad
-        placement.
+        Initial   
+
+
+        Learning by example is key to
+        the other modes of learning.
+        Today we'll discuss learning by reinforcement.
 
         \emph{Online}
 
@@ -290,5 +300,153 @@
 
   \samsection{deadly triad}
 
+
+  \pagebreak
+  \samsection{bonus slide: data dependency diagrams}
+      Let's visualize how weights and data affect each other in
+      four kinds of (online)\bcirc\marginnote{%
+        \blarr In \textbf{online} learning, we continuously learn as we receive a
+        stream of data.  Our goal is to experience small time-averaged loss.
+      } learning problem.
+      %
+      Solid and dashed arrows depict contrasts and commonalities.
+      %
+      Here, $\theta$ stands for weights; $s$, for prompts or states; $a$,
+      for true answers or ideal actions; $\hat a$, for guessed answers or
+      actual actions; $\ell$, loss.
+
+      % SUPERVISED
+      \samsubsubsection{supervised}
+        We learn from \emph{examples} $a$.
+        States are sampled independently.
+      
+        \begin{tikzcd} \theta_0 \arrow[rrr, dotted] \arrow[rdd, dotted] &
+        &                                   & \theta_1 \arrow[rrr, dotted]
+            \arrow[rdd, dotted] &
+            &                                   & \theta_2 \arrow[rrr, dotted]
+            \arrow[rdd, dotted] &
+            &                                   & \theta_3 \arrow[rd, dotted] &
+            \\ &
+            & \ell_0                               &
+            &
+            & \ell_1                               &
+            &
+            & \ell_2                               &                             &
+            \hat a_3               \\ & \hat a_0 \arrow[ru, dotted]
+            & a_0 \arrow[u, dotted] \arrow[ruu] &
+            & \hat a_1 \arrow[ru, dotted]
+            & a_1 \arrow[u, dotted] \arrow[ruu] &
+            & \hat a_2 \arrow[ru, dotted]
+            & a_2 \arrow[u, dotted] \arrow[ruu] &                             &
+            \\ & s_0 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted,
+            bend right=40] \arrow[ruu, dotted] &
+            &                                                  & s_1 \arrow[ru,
+            dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=40]
+            \arrow[ruu, dotted] &                                   &
+            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend
+            right=40] \arrow[ruu, dotted] &                                   &
+            & s_3 \arrow[uu, dotted]
+        \end{tikzcd}
+
+     % BANDIT
+     \samsubsubsection{conditional bandit}
+        We learn from \emph{rewards} $-\ell$.
+        States are sampled independently.
+
+        \begin{tikzcd} \theta_0 \arrow[rrr, dotted] \arrow[rdd, dotted] &
+        &                       & \theta_1 \arrow[rrr, dotted] \arrow[rdd,
+            dotted] &
+            &                       & \theta_2 \arrow[rrr, dotted] \arrow[rdd,
+            dotted] &
+            &                       & \theta_3 \arrow[rd, dotted] &
+            \\ &
+            & \ell_0 \arrow[ru]        &
+            &
+            & \ell_1 \arrow[ru]        &
+            &
+            & \ell_2 \arrow[ru]        &                             & \hat a_3
+            \\ & \hat a_0 \arrow[ru, dotted]
+            & a_0 \arrow[u, dotted] &
+            & \hat a_1 \arrow[ru, dotted]
+            & a_1 \arrow[u, dotted] &
+            & \hat a_2 \arrow[ru, dotted]
+            & a_2 \arrow[u, dotted] &                             &
+            \\ & s_0 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted,
+            bend right=40] \arrow[ruu, dotted] &                       &
+            & s_1 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend
+            right=40] \arrow[ruu, dotted] &                       &
+            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend
+            right=40] \arrow[ruu, dotted] &                       &
+            & s_3 \arrow[uu, dotted]
+        \end{tikzcd}
+
+     % IMITATION 
+     \samsubsubsection{imitation}
+        We learn from \emph{examples} $a$.
+        The state evolves over time.
+
+        \begin{tikzcd} \theta_0 \arrow[rrr, dotted] \arrow[rdd, dotted] &
+            &                                   & \theta_1 \arrow[rrr, dotted]
+            \arrow[rdd, dotted] &
+            &                                                & \theta_2
+            \arrow[rrr, dotted] \arrow[rdd, dotted] &
+            &                                   & \theta_3 \arrow[rd, dotted] &
+            \\ &
+            & \ell_0                               &
+            &
+            & \ell_1                                            &
+            &
+            & \ell_2                               &                             &
+            \hat a_3               \\ & \hat a_0 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
+            & a_0 \arrow[u, dotted] \arrow[ruu] &
+            & \hat a_1 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
+            & a_1 \arrow[u, dotted] \arrow[ruu]              &
+            & \hat a_2 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
+            & a_2 \arrow[u, dotted] \arrow[ruu] &                             &
+            \\ & s_0 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted,
+            bend right=40] \arrow[ruu, dotted] \arrow[rrr] &
+            &                                                  & s_1 \arrow[ru,
+            dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=40]
+            \arrow[ruu, dotted] \arrow[rrr] &
+            &                                                  & s_2 \arrow[ru,
+            dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=40]
+            \arrow[ruu, dotted] \arrow[rrr] &                                   &
+            & s_3 \arrow[uu, dotted] 
+        \end{tikzcd}
+        
+      % REINFORCEMENT
+      \samsubsubsection{classical reinforcement}
+        We learn from \emph{rewards} $-\ell$.
+        The state evolves over time.
+        
+        \begin{tikzcd} \theta_0 \arrow[rrr, dotted] \arrow[rdd, dotted] &
+            &                       & \theta_1 \arrow[rrr, dotted] \arrow[rdd,
+            dotted] &
+            &                       & \theta_2 \arrow[rrr, dotted] \arrow[rdd,
+            dotted] &
+            &                       & \theta_3 \arrow[rd, dotted] &
+            \\ &
+            & \ell_0 \arrow[ru]        &
+            &
+            & \ell_1 \arrow[ru]        &
+            &
+            & \ell_2 \arrow[ru]        &                             & \hat a_3
+            \\ & \hat a_0 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
+            & a_0 \arrow[u, dotted] &
+            & \hat a_1 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
+            & a_1 \arrow[u, dotted] &
+            & \hat a_2 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
+            & a_2 \arrow[u, dotted] &                             &
+            \\ & s_0 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted,
+            bend right=40] \arrow[ruu, dotted] \arrow[rrr] &
+            &                                                  & s_1 \arrow[ru,
+            dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=40]
+            \arrow[ruu, dotted] \arrow[rrr] &                       &
+            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend
+            right=40] \arrow[ruu, dotted] \arrow[rrr] &                       &
+            & s_3 \arrow[uu, dotted]
+        \end{tikzcd}
+      
+\vfill
 \end{document}
 
