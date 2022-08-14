@@ -1,5 +1,5 @@
 % author:   sam tenka
-% change:   2022-08-09
+% change:   2022-08-14
 % create:   2022-08-06
 
 %==============================================================================
@@ -18,6 +18,7 @@
   marginparwidth = 2.30in, % width of margin notes
                  % 0.20in  % width from margin to edge
 }
+
 
 %---------------------  0.0.1. math packages  ---------------------------------
 \newcommand\hmmax{0} % to allow for more fonts 
@@ -38,7 +39,19 @@
 
 %---------------------  0.0.3. packages for fancy text  -----------------------
 \usepackage{enumitem}\setlist{nosep}
+
+\usepackage{wedn, miama, pbsi}
+\usepackage[T1]{fontenc}
 \usepackage{listings}
+\newcommand*{\mycommentstyle}[1]{%
+  \begingroup
+    \lstset{columns=fullflexible}%
+    \bsifamily
+    \bre
+    \selectfont
+    #1%
+  \endgroup
+}
 \usepackage{xstring}
 \usepackage{fontawesome5}
 
@@ -50,6 +63,10 @@
 \definecolor{mgre}{rgb}{0.55, 0.55, 0.50} \newcommand{\gre}{\color{mgre}}
 \definecolor{mgrn}{rgb}{0.15, 0.65, 0.05} \newcommand{\grn}{\color{mgrn}}
 \definecolor{mred}{rgb}{0.90, 0.05, 0.05} \newcommand{\red}{\color{mred}}
+
+\definecolor{mdbre}{rgb}{0.15, 0.23, 0.30} \newcommand{\dbre}{\color{mdbre}}
+\definecolor{mdbro}{rgb}{0.30, 0.03, 0.03} \newcommand{\dbro}{\color{mdbro}}
+
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %~~~~~~~~~~~~~  0.1. Headers and References  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,6 +145,12 @@
 %---------------------  0.2.0. general math operators  ------------------------
 \newcommand{\scirc}{\mathrel{\mathsmaller{\mathsmaller{\mathsmaller{\circ}}}}}
 \newcommand{\cmop}[2]{{(#1\!\to\!#2)}}
+
+\newcommand{\horifrac}[2]{#1/#2}
+
+\newcommand{\wrap}[1]{\left(#1\right)}
+\newcommand{\wabs}[1]{\left|#1\right|}
+\newcommand{\wasq}[1]{\left[#1\right]}
 
 %---------------------  0.2.1. probability symbols  ---------------------------
 \newcommand{\KL}{\text{KL}}
@@ -210,9 +233,9 @@
 %==============================================================================
 
 \begin{document}
-  \samtitle{recitation 11}
+  \samtitle{tabular reinforcement learning}%recitation 11}
       
-  \samsection{classical reinforcement learning}
+  \samsection{a map of learning tasks}
     In the 
 
     Today we'll learn how to solve classical reinforcement learning problems. 
@@ -234,8 +257,11 @@
         sources.  We've so far focused on the most important case: learning
         from examples.  
 
-        Initial   
 
+        %https://www.desmos.com/calculator/c6fahb1azs
+
+
+        Initial   
 
         Learning by example is key to
         the other modes of learning.
@@ -265,6 +291,7 @@
           }
         \end{marginfigure}
 
+      \samsubsection{bias-variance; exploitation-exploration}
  
         reinforcement --> explore vs exploit
 
@@ -274,35 +301,245 @@
 
         P vs NP
 
+      \samsubsection{tabular vs leveraged; local gradient updates}
+
+        \pagebreak
   \samsection{bandits}
 
     \samsubsection{unconditional}
-      Okay, let's say that each action $a\in \aA$ in a known set of available
-      actions leads to a reward sampled randomly independently from some
-      unknown distribution $p_{\sfr;\aA}$. 
 
-      To keep things simple at the start, let's say $\aA$ is finite and 
-      $\sfr$ takes values in $\{0,1\}$.  Thus, the world is determined by 
-      a probability $p_a$ of nonzero reward for each action $a$.
+      \samsubsubsection{setup}
+        Okay, let's say that each action $a\in \aA$ in a known set of available
+        actions leads to a reward sampled randomly independently from some
+        unknown distribution $p_{\sfr;\aA}$. 
+        %
+        To keep things simple at the start, let's say $\aA$ is finite and
+        $\sfr$ takes values in $\{0,1\}$.  Thus, the world is determined by a
+        probability $p_a$ of nonzero reward for each action $a$.  In fact,
+        let's say there are only two actions: $a^\star = \text{argmax}_a p_a$
+        with reward $p^\star$ and $a^\circ$ with reward $p^\circ =
+        p^\star-\Delta$.  And let's say we go for some large number $T$ of
+        steps. 
 
-      exploration bonus: optimism.  uncertainty confidence bound
+        How high can we get our randomness-averaged time-totaled reward?  It
+        seems reasonable to compare this amount to the randomness-averaged
+        time-totaled reward we always did the most rewarding action
+        $a^\star$.  We want to minimize the difference, i.e., our
+        expected ``\textbf{regret}''.
+
+        Intuitively, if $\Delta \lesssim 1/\!\sqrt{T}$ we won't ever really know
+        which action is best.  In this case we don't expect to do better than
+        $\sqrt{T}$ expected regret.  So below we'll \attn{assume} $1/\sqrt{T}
+        \leq \Delta$.
+        %
+        %%At the other extreme, if $\Delta \sim 1$ remains at some constant like 
+        %%$0.1$ even as $T$ grows, then 
+
+        Here's one strategy: we could sample each $a$ say, $K=10$ times,
+        thereby estimating each $\hat p_a$.  From then on, we'd stick to $\hat
+        a^\star = \text{argmax}_a \hat p_a$.  (Say $|\aA| K \ll T$ so that this
+        latter step dominates).  Our expected regret then grows linearly with
+        $T$:\marginnote{%
+          \attn{Exercise}:
+          By the way, is $\hat p_{\hat a^\star}$ the same as $p_{\hat a^\star}$
+          on average?
+        }
+        \begin{align*}
+          \Ee \, \text{regret}_T \approx\,
+          \rR \,\triangleq\,
+             %&+        K \cdot \text{avg}_a \wabs{p_{a^\star} - p_a} && \leftarrow \textbf{explo\emph{ration} term} \\
+             &+ \Delta K                                             && \leftarrow \textbf{explo\emph{ration} term} \\
+             &+ \Delta T \cdot \Pp \wabs{\hat a^\star \neq a^\star}  && \leftarrow \textbf{explo\emph{itation} term}  
+        \end{align*}
+
+        Intuitively, $K$ trades off between the opportunity costs near the
+        beginning and in the remainder of our timesteps.  Larger $K$ means we
+        pay a slower start in return for more accurate estimates that'll inform
+        us for the rest of time.
+
+        Our cost is at most
+        $$
+          \Delta (K + T \exp(-K\Delta^2)) % forget the inverse-linear and the normalization factor...
+        $$
+
+      \samsubsubsection{oracle case}
+        Supposing we did know $\Delta$ and $T$, a best $K$ would 
+        balance the marginal cost $\partial K / \partial K = 1$ of longer exploration
+        against the marginal benefit $-\partial T \exp(-K\Delta^2) / \partial K = -T\Delta^2 \exp(-K\Delta^2)$
+        of more accurate exploitation:
+        %$
+        %  1 = T\Delta^2 \exp(-K\Delta^2) 
+        %$
+        %or
+        %$
+        %   1/(T\Delta^2) = \exp(-K\Delta^2)
+        %$
+        %or
+        $$
+           K = \log(T\Delta^2)/\Delta^2
+        $$
+        Then we incur cost\bcirc\marginnote{%
+            \blarr Note that IF we over-explore by setting $K =
+            \log(T)/\Delta^2$ --- that is, by replacing $T\Delta^2$ by $T$ ---
+            THEN our cost undergoes the same substitution to become
+            $(\log(T)+1)/\Delta$.
+            %
+            With $\Delta = \rho/\!\sqrt{T}$, this cost grows with $T$ like
+            $\rR \sim \log(T) \sqrt{T}$.
+        }
+        $$
+          %\Delta (\log(T\Delta^2)/\Delta^2 + T/(T\Delta^2))
+          %=
+          \rR = \frac{\log(T\Delta^2)+1}{\Delta}
+        $$
+        With $\Delta = \rho/\!\sqrt{T}$ for $1 \leq \rho$, this
+        %is
+        %$
+        %((2\log \rho + 1)/\rho)  \cdot \sqrt{T} 
+        %$,
+        %which
+        grows with $T$ like $\rR \sim \sqrt{T}$.
+
+        \vfill
+      \samsubsubsection{realistic case}
+        We don't know $T, \Delta$.  
+        %
+        But, astonishingly, there is an algorithm that has expected regret
+        nearly as low as when we \emph{do} know $T, \Delta$.
+
+        Intuitively, we want it to ``explore'' as many times $K$
+        as if we knew $T, \Delta$.  But
+        now, whether or not we do explore at timestep $t$ may depend
+        only on the length-$t$ list of previous actions and rewards rather
+        than on $\Delta$ and $T$.
+
+        Here's the clever insight: let's \emph{estimate} $\Delta$ and $T$ as
+        follows: $T \approx t$ and $\Delta \approx |\hat p_\star - \hat
+        p_\circ|$.  After all, on average $t$ is no more than a factor $1/2$   
+        off from the true $T$ --- and since $T$ appears in a log, it is
+        plausible that we may neglect this difference.
+        %
+        \attnsam{TODO: ``after all'' heuristic for $\Delta$}
+
+        %
+        So, as long as the number $\hat K$ of `explorations' so far is
+        $
+            \hat K < \log(T)/\Delta^2
+        $,
+        we'll want to do more exploration.
+        Let's write $\hat K = \min(N_\circ, N_\star)$, the least number of
+        experiencies we've had among actions.  Then we want to try the
+        empirically worse action $\hat a_\circ$ whenever:
+        %
+        $
+            \hat p_\star < \hat p_\circ + \sqrt{\horifrac{\log(T)}{\min(N_\circ, N_\star)}}  
+        $.
+        With the understanding that $N_\star$ will typically be much bigger than
+        $N_\circ$, the above condition is almost the same as this more symmetrical
+        condition:
+        $$
+            \hat p_\star + \sqrt{\horifrac{\log(t)}{N_\star}} < \hat p_\circ + \sqrt{\horifrac{\log(t)}{N_\circ}}  
+        $$
+
+        We now have a nice interpretation: at each point in time we choose
+        an action with `highest potential', where we judge an action $a$'s potential
+        not only by its empirical reward $\hat p_a$ but also by an uncertainty score
+        or \textbf{explorer's bonus} $\sqrt{\log(t)/N_a}$.
+        have high  \emph{}
+
+        \attnsam{TODO: Observe that most exploration usually happens near the very beginning}
+        of time.
+
+        As in the previous passage,\bcirc\marginnote{%
+            \blarr We may argue similarly as in the previous passage EXCEPT
+            that we must be more careful because different actions are no longer
+            independent!
+        } this incurs
+        $$
+          \rR \sim \frac{\log(T\Delta^2)+1}{\Delta}
+        $$ 
+        much cost, which is a $\log(T)$ factor within the oracle case! 
+
+      \samsubsubsection{code}
+        Translating the realistic case algorithm to code is straightforward.
+        We just have to worry about early-time edge cases where we
+        would take logs or reciprocals of zero.  A nice
+        way to sweep these issues under the rug is to initialize our counts
+        to small nonzero values.
+
+        \begin{lstlisting}[language=Python, basicstyle=\footnotesize\ttfamily, commentstyle=\mycommentstyle, keywordstyle=\bfseries]
+    actions = set([...]) 
+
+    tot_reward_by_action = {0.1 for a in actions} # We initialize to small, nonzero 
+    nb_trials_by_action = {0.1 for a in actions}  #   values to avoid divide by zero. 
+    T = sum(nb_trials_by_action.values()) # This relation we preserve for all time.
+
+    def reward_estimate(a): return tot_reward_by_action[a] / nb_trials_by_action[a] 
+    def explorers_bonus(a): return np.sqrt(np.log(T) / nb_trials_by_action[a]) 
+    def next_action(a): return max(( reward_estimate(a)
+                                    +explorers_bonus(a), a) for a in actions)[1] 
+    def learn_from(a, r):
+        tot_reward_by_action[a] += r
+        nb_trials_by_action[a] += 1
+        T += 1
+        \end{lstlisting}
+        \vfill
 
     \samsubsection{conditional}
 
+        In the conditional case the reward may depend on some observed input
+        $\sfs$ sampled i.i.d.\ from some unknown distribution on a known set $\sS$.
+        So the reward structure is determined by the symbol $p_{r|s;\aA}$.
+
+
+        %It turns out that our original thought experiment with $\Delta\approx
+        %1/\sqrt{T}$ is close to worst case.\marginnote{%
+        %  If Nature adversarially chooses then tells us $\Delta$, the worst 
+        %  choice of $\Delta$ obeys
+        %  $$
+        %    \frac{2/\Delta}{\Delta} = \frac{\log(T\Delta^2)+1/T}{\Delta^2}
+        %  $$
+        %  That is:
+        %  $$
+        %  2 = \log(T\Delta^2)+1/T
+        %  $$
+        %  That is:
+        %  $$
+        %    \Delta \approx \sqrt{\exp(2)/T}
+        %  $$
+        %  which gives expected reward $\approx \sqrt{T}$.
+        %  And we'll see that even when we don't know $\Delta$ after nature chooses
+        %  $\Delta$, the same roughly holds.
+        %}
+        %In this case we have cost roughly 
+        %$$
+        %  \sqrt{T \log T}
+        %$$
+        
+        %
+        %exploration bonus: optimism.  uncertainty confidence bound
+
+    %\samsubsection{conditional}
+
+    \pagebreak
   \samsection{imitation}
 
     \samsubsection{on-policy learning: TD}
 
+    \samsubsection{euler error}
+
   \samsection{classical RL}
 
     \samsubsection{on-policy learning: TD}
+
     \samsubsection{off-policy learning: Q}
 
-  \samsection{deadly triad}
+    \samsubsection{exploration strategies} % and incentives
+
 
 
   \pagebreak
-  \samsection{bonus slide: data dependency diagrams}
+  \samsubsection{bonus slide: data dependency diagrams}
       Let's visualize how weights and data affect each other in
       four kinds of (online)\bcirc\marginnote{%
         \blarr In \textbf{online} learning, we continuously learn as we receive a
@@ -381,7 +618,7 @@
         \end{tikzcd}
 
      % IMITATION 
-     \samsubsubsection{imitation}
+     \samsubsubsection{(special case of) imitation}
         We learn from \emph{examples} $a$.
         The state evolves over time.
 
