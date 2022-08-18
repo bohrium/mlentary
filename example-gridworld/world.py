@@ -1,12 +1,84 @@
 ''' author: samtenka
-    change: 2022-08-17
+    change: 2022-08-18
     create: 2022-08-07
-    descrp:  
-            See the giant comment below (section 1) for MDP details.
-            The three-character token "(!)" highlights lines of code to study
-            or to change in the code below.
-    jargon:
-    to use:
+
+    descrp: Learn (from reinforcement) to water house plants in a simulated
+            world.  Interactively simulate a uniform random policy or a policy
+            learned via q-learning --- the latter we may save to or load from
+            files so as not to train redundantly.
+
+            The agent may move across the house's fixed floorplan and may
+            interact with various devices in the house including an h20 source,
+            a fern, and a charging station.  The agent is rewarded for carrying
+            water from the h20 source to the fern whenever the fern becomes
+            dry.  See section 1 for MDP details.
+
+            We allow experiments with different q-function approximators and
+            q-learning times; with different special techniques to accelerate
+            learning by encouraging exploration; and with different world 
+            dynamics.  See sections 0.1.1, 0.1.2, and 0.1.3 for control knobs.
+
+            See comments marked with the three-character token "(!)" for
+            highlights (to study or to change) in the code below.
+
+    to use: A typical use of this program involves 4 steps:
+                (a) adjust loading and training parameters in section 0.1
+                (b) run the command line command `python3 world.py` 
+                (c) if training: wait for the progress bar to complete
+                (d) observe the learned behavior by repeatedly pressing ENTER;
+
+            Regarding (a): we may decide which policy to simulate by changing
+            the value of POLICY_FROM in section 0.1.0: 'train' means we train a
+            policy from scratch according to the indicated training settings;
+            'load' means we load a policy previously trained using the
+            indicated training settings; and 'uniform' means we use a uniform
+            random policy, which doesn't need training.
+
+            Training settings are indicated in sections 0.1.1, 0.1.2, 0.1.3.
+
+            Here is a sequence of suggested experiments, each of which
+            describes what to do in step (a) before we perform steps (bcd).  In
+            all but experiments [0,2], we'll set POLICY_FROM='train'.  In each
+            experiment, we assume that the training settings not mentioned are
+            at their default values.
+                [0] set POLICY_FROM='uniform' (so no training)
+                [1] set POLICY_FROM='train' (so train with default values) 
+                [2] set POLICY_FROM='load' to see how loading works 
+                [3] set ENABLE_CHARGE=True --- do you observe new behavior? 
+                [4] for ENABLE_CHARGE=True, is NB_LIVES=500 enough traintime?
+            In [5,6,7,8,9], we enable both CHARGE and DOOR:
+                [5] --- does the learned behavior seem optimal?
+                [6] what if we set NB_LIVES=5000?  does this improve behavior?
+                [7] what if we set OPTIMISM=True, instead?
+                [8] what if we set CURRICULUM=True, instead?
+                [9] what if we do [5,6,7]'s changes simultaneously?
+
+            Regarding (c): setting NB_LIVES = 1000 and NB_STEPS_PER_LIFE = 1000
+            should lead to a training progress bar that finishes in ~10 seconds
+            with all other parameters at their default value (section 1.3
+            describes these default values).  Five other parameters much affect
+            training walltime:
+                Q_FUNCTION='linear'     -->  x 6.   training time
+                REPLAY=True             -->  x 2.   training time 
+                ENABLE_BUCKET=True      -->  x 1.5  training time 
+                ENABLE_CHARGE=True      -->  x 1.5  training time 
+                ENABLE_DOOR  =True      -->  x 1.5  training time 
+
+            Regarding (d): as described in the instructions that print when we
+            run this script, we may type a fullstop before pressing ENTER in
+            order to skip ahead in time to the next interesting state.  We may
+            also force a desired action rather than following the chosen policy
+            by typing one-character or two-character strings such as 
+                <
+            or
+                ^
+            or
+                >w
+            or
+                xw
+            before pressing ENTER.  Those four example commands respectively:
+            move left; move up; move right while impelling or expelling water;
+            stay put while impelling or expelling water.
 '''
 
 #==============================================================================
@@ -35,27 +107,27 @@ import numpy as np
 
 #---  0.1.0. should we train or load our policy?  or set it to uniform?  ------
 
-POLICY_FROM = 'load'       #   'train' or 'load' or 'uniform'
+POLICY_FROM = 'train'      #   'train' or 'load' or 'uniform'
 
 #---  0.1.1. the q-function approximator and how long to train it  ------------
 
-Q_FUNCTION = 'tabular'      #   'tabular' or 'linear'
-NB_LIVES          = 1000    #   any nonnegative integer, e.g. 300 or 3000
-NB_STEPS_PER_LIFE = 1000    #   any nonnegative integer, e.g. 300 or 3000
+Q_FUNCTION = 'tabular'      #   'tabular' or 'linear'   --- default 'tabular'
+NB_LIVES          = 1000    #   any nonnegative integer --- default 1000
+NB_STEPS_PER_LIFE = 1000    #   any nonnegative integer --- default 1000
 
 #---  0.1.2. enable or disable exploration boosting techniques  ---------------
 
-EPSILON       = True        #   True or False
-OPTIMISM      = True        #   True or False
-CURRICULUM    = True        #   True or False
-PSEUDOGOAL    = True        #   True or False
-REPLAY        = True        #   True or False
+EPSILON       = True        #   True or False   --- default True 
+OPTIMISM      = False       #   True or False   --- default False
+CURRICULUM    = False       #   True or False   --- default False
+PSEUDOGOAL    = False       #   True or False   --- default False
+REPLAY        = False       #   True or False   --- default False
 
 #---  0.1.3. enable or disable complexities of the world ----------------------
 
-ENABLE_BUCKET = False       #   True or False
-ENABLE_CHARGE = True        #   True or False
-ENABLE_DOOR   = False       #   True or False
+ENABLE_BUCKET = False       #   True or False   --- default False
+ENABLE_CHARGE = False       #   True or False   --- default False
+ENABLE_DOOR   = False       #   True or False   --- default False
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~  0.2. Parameter-Based Strings  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,19 +154,19 @@ EXPLANATION_OFFSET = len('tricks  --(     ')
 EXPLANATION = (
 '''
              __ | | | {A}| {B}| {C}|  | | | | |
-            /   | | | {A}| {B}| {C}|  | | | | +- {}replay<b>
-training   /    | | | {A}| {B}| {C}|  | | | +- {}pseudogoal<b>
-tricks  --(     | | | {A}| {B}| {C}|  | | +- {}curriculum<b>
-           \    | | | {A}| {B}| {C}|  | +- {}optimism<b>
+training    /   | | | {A}| {B}| {C}|  | | | | +- {}replay<b>
+tricks     /    | | | {A}| {B}| {C}|  | | | +- {}pseudogoal<b>
+to help --(     | | | {A}| {B}| {C}|  | | +- {}curriculum<b>
+explore    \    | | | {A}| {B}| {C}|  | +- {}optimism<b>
             \__ | | | {A}| {B}| {C}|  +- {}epsilon<b>
              __ | | | {A}| {B}| {C}|                         
 training    /   | | | {A}| {B}| {C}+- <c>{}<b> steps per life
 time &  ---(    | | | {A}| {B}+- <c>{}<b> lives of training
-            \__ | | | {A}+- <c>{}<b> Q-function approximation
+model       \__ | | | {A}+- <c>{}<b> Q-function approximation
              __ | | |                                          
-training    /   | | +- {}door may open or close<b>                
-world   ---(    | +- {}charge lost over time<b>                
-            \__ +- {}bucket can be filled and drained<b>                  
+training    /   | | +- {}humans might open or close the door<b>
+world's ---(    | +- {}robot needs occasional recharge<b>                
+complexities\__ +- {}bucket can be filled and drained<b>                  
 '''.replace('{A}', ' '*int(LQ/2.0))
    .replace('{B}', ' '*(int((LQ-1.0)/2.0) + int(LL/2.0)))
    .replace('{C}', ' '*(int((LL-1.0)/2.0) + int(LS/2.0)))
@@ -243,19 +315,20 @@ def rand_el(L):
         {a} [medium]    like when the fern is wet
         {b} [medium] dislike when the fern is dry
 
-        {c} [STRONG] dislike of watering an already wet fern
-        {d} [medium]    like of watering a dry fern
-        {e} [STRONG] dislike of spilling water on charger
-        {f} [medium] dislike of spilling water anywhere but fern or bucket
+        {c} [ mild ] dislike of (im/ex)pelling water (motors sound annoying)
+        {d} [STRONG] dislike of watering an already wet fern
+        {e} [medium]    like of watering a dry fern
+        {f} [STRONG] dislike of spilling water on charger
+        {g} [medium] dislike of spilling water anywhere but fern or bucket
 
-        {g} [ mild ] dislike of overcharging once full of charge
-        {h} [medium] dislike of charging while holding water
-        {i} [STRONG] dislike when no charge left (backup battery expensive)
+        {h} [ mild ] dislike of overcharging once full of charge
+        {i} [medium] dislike of charging while holding water
+        {j} [STRONG] dislike when no charge left (backup battery expensive)
 
-        {j} [STRONG] dislike of blocking door from being closed
+        {k} [STRONG] dislike of blocking door from being closed
 
-        {k} [ mild ] dislike of moving at all (motors make annoying sound)
-        {l} [medium] dislike of bumping into the wall or into a closed door
+        {l} [ mild ] dislike of moving at all (motors make annoying sound)
+        {m} [medium] dislike of bumping into the wall or into a closed door
 
     The discount factor is GAMMA=0.98, meaning that the robot cares most about
     its rewards within the next 50=1/(1-GAMMA) timesteps.  
@@ -274,10 +347,8 @@ def rand_el(L):
     the h20 source to the fern whenever the fern becomes dry.
 
     We may relax these constraints and allow the door, bucket, and/or charge
-    to change over time by flipping False->True in these lines of code:
-        ENABLE_CHARGE = False
-        ENABLE_DOOR   = False
-        ENABLE_BUCKET = False
+    to change over time by setting ENABLE_CHARGE, ENABLE_DOOR, ENABLE_BUCKET
+    to True.
 '''
 
 #==============================================================================
@@ -367,7 +438,7 @@ class World:
 
         # water
         if water_action:
-            reward += - 0.1 # cost for water action
+            reward += - 0.1               # reward term named {c}
             if (self.row,self.col) == self.__h20__:
                 self.has_water = not self.has_water
                 self.environment_just_changed = True
@@ -380,32 +451,32 @@ class World:
                 self.environment_just_changed = True
                 if (self.row,self.col) == self.__frn__:
                     if self.fern_wet:
-                        reward += -10.0 # reward term named {c}
+                        reward += -10.0     # reward term named {d}
                     else:
                         # wet a dry fern:
                         self.fern_wet = True
                         self.environment_just_changed = True
-                        reward += + 2.0 # reward term named {d}
+                        reward += + 2.0     # reward term named {e}
                 elif (self.row,self.col) == self.__chg__:
-                    reward += -20.0     # reward term named {e}
+                    reward += -20.0         # reward term named {f}
                 else:
-                    reward += - 2.0     # reward term named {f}
+                    reward += - 2.0         # reward term named {g}
 
         # charging
         if ENABLE_CHARGE:
             if (self.row,self.col) == self.__chg__:
                 if self.charge==3:
-                    reward += - 0.5     # reward term named {g}
+                    reward += - 0.5         # reward term named {h}
                 self.charge = min(3, self.charge+1) 
                 self.environment_just_changed = True
                 if self.has_water:
-                    reward += - 2.0     # reward term named {h}
+                    reward += - 2.0         # reward term named {i}
             elif (dr or dc) and coin(self.PROB_LOSE_CHARGE):
                 self.charge = max(0, self.charge-1)
                 self.environment_just_changed = True
             #
             if self.charge == 0:
-                reward += - 1.5         # reward term named {i}
+                reward += - 1.5             # reward term named {j}
 
         # door
         if ENABLE_DOOR:
@@ -414,19 +485,19 @@ class World:
                 self.environment_just_changed = True
             elif self.door_open and coin(self.PROB_DOOR_CLOSES):
                 if (self.row,self.col) == self.__dor__:
-                    reward += -10.0     # reward term named {j}
+                    reward += -10.0         # reward term named {k}
                 else:
                     self.door_open = False
                     self.environment_just_changed = True
 
         # locomotion (affects (row, col), so paragraph should be placed last!)
         if dr or dc:
-            reward += - 0.1             # reward term named {k}
+            reward += - 0.1                 # reward term named {l}
         r, c = (self.row+dr, self.col+dc) 
         if self.in_bounds(r,c):
             self.row, self.col = (r,c)
         else:
-            reward += - 0.5             # reward term named {l}
+            reward += - 0.5                 # reward term named {m}
 
         self.steps_elapsed += 1 
         self.total_reward = reward + self.GAMMA * self.total_reward  
@@ -459,7 +530,7 @@ class World:
         reward = self.total_reward
         reward = ('<r>' if reward<0 else '')  +'${:+.2f}'.format(reward)
 
-        water  = "<r>ISN'T" if self.has_water else 'is' 
+        water  = 'is' if self.has_water else "<r>ISN'T"
         fern   = 'ok' if self.fern_wet else '<r>DRY'
         bucket = 'full' if self.buck_full else '<r>EMPTY'
         door   = 'open' if self.door_open else '<r>CLOSED'
@@ -555,7 +626,7 @@ class QFunctionTabular(QFunction):
     #              \/            \/            \/       
     #                                                   
     #   (!)     KEY LINE OF CODE FOR TABULAR QLEARN: 
-    #                                                   
+    #                                ^^^^^^^            
     #              /\            /\            /\       
     #             /  \          /  \          /  \      
     #            /    \        /    \        /    \     
@@ -571,15 +642,19 @@ class QFunctionTabular(QFunction):
 class QFunctionLinear(QFunction):
     def __init__(self, STATES, ACTIONS, optimism=0.0):
 
-        self.q_table = {(s,a):optimism for s in STATES for a in ACTIONS}
+        #self.q_table = {(s,a):optimism for s in STATES for a in ACTIONS}
+        self.q_table = {(s,):optimism for s in STATES}
 
+        self.rcs = {tuple(s[:2]) for s in STATES}
         example_state = next(iter(STATES))
-        self.state_axes = [set([]) for _ in example_state] 
+        self.state_axes = [set([]) for _ in example_state[2:]] 
         for s in STATES:
-            for i,x in enumerate(s):
+            for i,x in enumerate(s[2:]):
                 self.state_axes[i].add(x)
-        self.q_aux = [{(x,a):0.0 for x in axis for a in ACTIONS}
-                      for axis in self.state_axes               ]
+        self.q_aux = [{(rc,x,a):0.0 for rc in self.rcs
+                                    for x in axis
+                                    for a in ACTIONS  }
+                      for axis in self.state_axes      ]
 
         self.ACTIONS = ACTIONS
 
@@ -593,19 +668,21 @@ class QFunctionLinear(QFunction):
     #              \/            \/            \/       
     #                                                   
     #   (!)     KEY LINES OF CODE FOR LINEAR QLEARN: 
-    #                                                   
+    #                                 ^^^^^^            
     #              /\            /\            /\       
     #             /  \          /  \          /  \      
     #            /    \        /    \        /    \     
-    def nudge_toward(self, s, a, new_val, learn_rate, aux_factor=0.001):
+    def nudge_toward(self, s, a, new_val, learn_rate, aux_factor=0.1):
         discrepancy = new_val - self.query_q(s,a) 
-        self.q_table[(s,a)] += learn_rate * discrepancy
-        for i,x in enumerate(s):
-            self.q_aux[i][(x,a)] += learn_rate*(aux_factor * discrepancy)
+        #self.q_table[(s,a)] += learn_rate * discrepancy
+        self.q_table[(s,)] += learn_rate * discrepancy
+        for i,x in enumerate(s[2:]):
+            self.q_aux[i][(tuple(s[:2]),x,a)] += learn_rate*(aux_factor * discrepancy)
 
     def query_q(self, s, a):
-        return self.q_table[(s,a)] + sum(self.q_aux[i][(x,a)]
-                                         for i,x in enumerate(s))
+        #return self.q_table[(s,a)] + sum(self.q_aux[i][(tuple(s[:2]),x,a)]
+        return self.q_table[(s,)] + sum(self.q_aux[i][(tuple(s[:2]),x,a)]
+                                        for i,x in enumerate(s[2:]))
     def query_a(self, s):
         _, a = max((self.query_q(s,a),a) for a in self.ACTIONS)
         return a
@@ -619,7 +696,8 @@ class QFunctionLinear(QFunction):
 #==============================================================================
 
 def uniform_policy(state):
-    return A[np.random.choice(len(A))]
+    global A
+    return rand_el(A)
 
 def policy_from_table(q_table):
     def policy(state):
@@ -635,8 +713,8 @@ def simulate_policy(world, policy, nb_steps):
     return world.total_reward
 
 def q_learn(world, nb_lives, nb_steps_per_life, learn_rate,
-            exploration_policy, epsilons = [2**-7, 2**-5, 2**-3, 2**-1],
-            optimism = 1.0,
+            explore_policy=uniform_policy, epsilons=[2**-7,2**-5,2**-3,2**-1],
+            optimism =  2.0,
             curriculum=True,
             pg_bonus = 1.0, nb_pgs = 20,
             nb_replays = 2, mem_prob = 0.01, nb_mem = 1000, 
@@ -649,7 +727,9 @@ def q_learn(world, nb_lives, nb_steps_per_life, learn_rate,
     experience_buffer = []
 
     for l in tqdm.tqdm(range(nb_lives)):
-        eps = np.random.choice(epsilons)
+        lr = learn_rate # * (0.1*nb_lives) / (1 + 0.1*nb_lives + l) 
+
+        eps = rand_el(epsilons)
         q_explore.copy_from(q_main)
 
         pseudo_goals = {rand_el(list(world.STATES))
@@ -660,15 +740,16 @@ def q_learn(world, nb_lives, nb_steps_per_life, learn_rate,
         for t in range(nb_steps_per_life):
             # perform an action and hence gain one step more of experience: 
             s = world.state()
-            if coin(eps): a = exploration_policy(s)
+            if coin(eps): a = explore_policy(s)
             else        : a = q_explore.query_a(s)
             r = world.perform_action(a)
             new_state = world.state()
 
-            # add artificial incentives to accelerate learning:
+            #   ...add artificial incentives to accelerate learning:
             if curriculum:
                 if W.has_water  : r += 0.2 
                 if W.charge >= 2: r += 0.2 
+                if W.buck_full  : r += 0.2 
 
             # update memory buffer:
             if coin(mem_prob):
@@ -686,17 +767,18 @@ def q_learn(world, nb_lives, nb_steps_per_life, learn_rate,
             #              /\            /\            /\       
             #             /  \          /  \          /  \      
             #            /    \        /    \        /    \     
-            q_main.update(s, a, r, new_state, world.GAMMA, learn_rate)
+            q_main.update(s, a, r, new_state, world.GAMMA, lr)
 
             # update exploration Q from experience:
+            #   ...add artificial incentives to accelerate learning:
             if new_state in pseudo_goals:
                 r += pg_bonus
-            q_explore.update(s, a, r, new_state, world.GAMMA, learn_rate)
+            q_explore.update(s, a, r, new_state, world.GAMMA, lr)
 
             # update main Q from memory buffer:
             for _ in range(min(nb_replays, len(experience_buffer))):
                 (s, a, r, new_state) = rand_el(experience_buffer)
-                q_main.update(s, a, r, new_state, world.GAMMA, learn_rate)
+                q_main.update(s, a, r, new_state, world.GAMMA, lr)
 
     return q_main
 
@@ -713,7 +795,7 @@ def step(W, a):
 def simulate(W, policy=uniform_policy):
     display('\n<b>INSTRUCTIONS: enter an <y>empty string<b> to step once;')
     display('\nenter <y>.<b> to simulate until non-location-state changes;')
-    display('\nenter <y><<b> or <y>><b> or <y>^<b> or <y>v<b> to thusly move,')
+    display('\nenter <y><<b> or <y>><b> or <y>^<b> or <y>v<b> (or <y>x<b>) to force a (non)move,')
     display('\nappending <y>w<b> to perform a water action as well.\n\n')
     W.reset()
     W.print_verbose()
@@ -721,8 +803,8 @@ def simulate(W, policy=uniform_policy):
     while True:
         display('<y>')
         s = input('')
-        if s and s[0] in '<>^v': 
-            a = ({'<':(0,-1),'>':(0,+1),'^':(-1,0),'v':(+1,0),}[s[0]],
+        if s and s[0] in '<>^vx': 
+            a = ({'<':(0,-1),'>':(0,+1),'^':(-1,0),'v':(+1,0),'x':(0,0)}[s[0]],
                  (len(s)>=2 and s[1]=='w')) 
             step(W, a)
         else:
@@ -732,6 +814,7 @@ def simulate(W, policy=uniform_policy):
             display('\n')
             step(W, policy(W.state()))
             time.sleep(0.02)
+        #print(q_table.q_aux)
 
 if __name__=='__main__':
     init_random_number_generator()
@@ -739,11 +822,12 @@ if __name__=='__main__':
     W = World()
     A = list(W.ACTIONS)
     S = list(W.STATES)
-    display('<b>the world allows <c>{}<b> many actions ', len(A))
+    display('<b>the world allows <c>{}<b> actions ', len(A))
     display('<b>in each of <c>{}<b> many states\n', len(S))
     
     if POLICY_FROM=='train': 
-        display('<b>training using q-learning...\n', FILE_NAME)
+        display('<b>using q-learning to train <c>{}<b>...', FILE_NAME)
+        display(EXPLANATION.replace('\n', '\n'+' '*(len('using q-learning to train q.')-EXPLANATION_OFFSET)))
         kw = {}
         if not EPSILON   :  kw['epsilons'] = [0.0]
         if not OPTIMISM  :  kw['optimism'] = 0.0
@@ -751,15 +835,14 @@ if __name__=='__main__':
         if not PSEUDOGOAL:  kw['pg_bonus']=kw['nb_pgs'] = 0
         if not REPLAY    :  kw['nb_replays']=kw['mem_prob']=kw['nb_mem'] = 0
         q_table = q_learn(W,NB_LIVES,NB_STEPS_PER_LIFE,
-                          learn_rate=0.1, exploration_policy=uniform_policy,
-                          **kwargs)
-        display('<c>saving<b> Q to <c>{}<b>\n', FILE_NAME)
+                          learn_rate=0.1, **kw)
+        display('<c>saving<b> Qfunction to <c>{}<b>\n', FILE_NAME)
         np.save(FILE_NAME, q_table)
         policy = policy_from_table(q_table)
         policy_name = FILE_NAME
     elif POLICY_FROM=='load':
-        display('<c>loading<b> Q from <c>{}<b>', FILE_NAME)
-        display(EXPLANATION.replace('\n', '\n'+' '*(len('loading Q from q.')-EXPLANATION_OFFSET)))
+        display('<c>loading<b> Qfunction from <c>{}<b>', FILE_NAME)
+        display(EXPLANATION.replace('\n', '\n'+' '*(len('loading Qfunction from q.')-EXPLANATION_OFFSET)))
         q_table = np.load(FILE_NAME, allow_pickle=True).item()
         policy = policy_from_table(q_table)
         policy_name = FILE_NAME
@@ -767,5 +850,5 @@ if __name__=='__main__':
         policy = uniform_policy
         policy_name = 'uniform'
 
-    display('\nexecuting policy <c>{}<b>\n', policy_name)
+    display('\nexecuting policy <c>{}<b>...\n', policy_name)
     simulate(W, policy=policy)
