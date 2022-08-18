@@ -548,140 +548,188 @@
       %
       Solid and dashed arrows depict contrasts and commonalities.
       %
-      Here, $\theta$ stands for weights; $s$, for prompts or states; $a$,
-      for true answers or ideal actions; $\hat a$, for guessed answers or
-      actual actions; $\ell$, loss.
+      Here,
+      $\textsf{LRN}$ stands for our learner (e.g.\ its weights);
+      %$\theta$ stands for weights;
+      $s$, for the current prompt or state;
+      %$a^\star$, for true answers or ideal actions;
+      $\hat a$, for an answer guessed or an action taken;
+      $\lL$, for an unbiased estimator of loss-as-a-function-of-action given $s$;
+      and $\ell=\lL(\hat a)$, for loss incurred.
+
 
       % SUPERVISED
       \samsubsubsection{supervised}
-        We learn from \emph{examples} $a$.
+        We learn from \emph{examples} $\lL$.\bcirc\marginnote{%
+          \blarr In vanilla supervised learning, $\lL$ is induced from a random
+          sample $a$ (conditioned on $s$) of a `true' answer or `ideal'
+          action together with some known cost function $c$: $\lL = c(\hat
+          a;a)$.
+          %
+          Knowledge of $\lL$ allows \textbf{contrafactual reasoning}: \emph{how
+          much loss would I have incurred had I instead set $\hat a = \cdots$?}
+        }
         States are sampled independently.
       
-        \begin{tikzcd} \theta_0 \arrow[rrr, dotted] \arrow[rdd, dotted] &
-        &                                   & \theta_1 \arrow[rrr, dotted]
-            \arrow[rdd, dotted] &
-            &                                   & \theta_2 \arrow[rrr, dotted]
-            \arrow[rdd, dotted] &
-            &                                   & \theta_3 \arrow[rd, dotted] &
-            \\ &
-            & \ell_0                               &
+        \tikzcdset{diagrams={arrows={shorten >=-0.5ex,shorten <=-0.5ex}}}
+
+        \noindent%
+        \begin{tikzcd}%
+            \textsf{LRN}_0 \arrow[rrr, dotted] \arrow[rdd,
+        dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_1 \arrow[rrr,
+            dotted] \arrow[rdd, dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_1 \arrow[rrr,
+            dotted] \arrow[rdd, dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_2 \arrow[rdd,
+            dotted] & [-18pt]                                  & [-18pt] \\
             &
-            & \ell_1                               &
+            & \ell_0      &
             &
-            & \ell_2                               &                             &
-            \hat a_3               \\ & \hat a_0 \arrow[ru, dotted]
-            & a_0 \arrow[u, dotted] \arrow[ruu] &
-            & \hat a_1 \arrow[ru, dotted]
-            & a_1 \arrow[u, dotted] \arrow[ruu] &
-            & \hat a_2 \arrow[ru, dotted]
-            & a_2 \arrow[u, dotted] \arrow[ruu] &                             &
-            \\ & s_0 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted,
-            bend right=40] \arrow[ruu, dotted] &
-            &                                                  & s_1 \arrow[ru,
-            dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=40]
-            \arrow[ruu, dotted] &                                   &
-            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend
-            right=40] \arrow[ruu, dotted] &                                   &
-            & s_3 \arrow[uu, dotted]
+            & \ell_1      &
+            &
+            & \ell_2      &
+            &                                            & \ell_3    \\
+            & \hat a_0 \arrow[ru, dotted, bend right=18]
+            & \lL_0 \arrow[ruu] \arrow[u, dotted, bend left=18] &
+            & \hat a_1 \arrow[ru, dotted, bend right=18]
+            & \lL_1 \arrow[ruu] \arrow[u, dotted, bend left=18] &
+            & \hat a_2 \arrow[ru, dotted, bend right=18]
+            & \lL_2 \arrow[ruu] \arrow[u, dotted, bend left=18] &
+            & \hat a_3 \arrow[ru, dotted, bend right=18]                                  &
+            \lL_3 \arrow[u, dotted, bend left=18] \\ & s_0 \arrow[ru, dotted]
+            \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27] &
+            &
+            & s_1 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27]
+            &                                             &
+            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27]
+            &                                             &
+            & s_3 \arrow[u, dotted] \arrow[ru, dotted] &
         \end{tikzcd}
+
 
      % BANDIT
      \samsubsubsection{conditional bandit}
-        We learn from \emph{rewards} $-\ell$.
+        We learn from \emph{rewards} $-\ell$.\bcirc\marginnote{%
+          \blarr By contrast, mere knowledge of $\ell$ does not allow
+          contrafactual reasoning.  In order to find out what would have
+          happened had we instead set $\hat a = \cdots$, we'd have to try that
+          action out.  That is: \textbf{it costs us to explore} alternative
+          actions. 
+        }
         States are sampled independently.
 
-        \begin{tikzcd} \theta_0 \arrow[rrr, dotted] \arrow[rdd, dotted] &
-        &                       & \theta_1 \arrow[rrr, dotted] \arrow[rdd,
-            dotted] &
-            &                       & \theta_2 \arrow[rrr, dotted] \arrow[rdd,
-            dotted] &
-            &                       & \theta_3 \arrow[rd, dotted] &
-            \\ &
-            & \ell_0 \arrow[ru]        &
+        \noindent%
+        \begin{tikzcd}%
+            \textsf{LRN}_0 \arrow[rrr, dotted] \arrow[rdd,
+        dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_1 \arrow[rrr,
+            dotted] \arrow[rdd, dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_1 \arrow[rrr,
+            dotted] \arrow[rdd, dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_2 \arrow[rdd,
+            dotted] & [-18pt]                                  & [-18pt] \\
             &
-            & \ell_1 \arrow[ru]        &
+            & \ell_0 \arrow[ru]     &
             &
-            & \ell_2 \arrow[ru]        &                             & \hat a_3
-            \\ & \hat a_0 \arrow[ru, dotted]
-            & a_0 \arrow[u, dotted] &
-            & \hat a_1 \arrow[ru, dotted]
-            & a_1 \arrow[u, dotted] &
-            & \hat a_2 \arrow[ru, dotted]
-            & a_2 \arrow[u, dotted] &                             &
-            \\ & s_0 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted,
-            bend right=40] \arrow[ruu, dotted] &                       &
-            & s_1 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend
-            right=40] \arrow[ruu, dotted] &                       &
-            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend
-            right=40] \arrow[ruu, dotted] &                       &
-            & s_3 \arrow[uu, dotted]
+            & \ell_1 \arrow[ru]     &
+            &
+            & \ell_2 \arrow[ru]     &
+            &                                            & \ell_3    \\
+            & \hat a_0 \arrow[ru, dotted, bend right=18] 
+            & \lL_0 \arrow[u, dotted, bend left=18] &
+            & \hat a_1 \arrow[ru, dotted, bend right=18] 
+            & \lL_1 \arrow[u, dotted, bend left=18] &
+            & \hat a_2 \arrow[ru, dotted, bend right=18] 
+            & \lL_2 \arrow[u, dotted, bend left=18] &
+            & \hat a_3 \arrow[ru, dotted, bend right=18]                                  &
+            \lL_3 \arrow[u, dotted, bend left=18] \\ & s_0 \arrow[ru, dotted]
+            \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27] &
+            &
+            & s_1 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27]
+            &                                             &
+            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27]
+            &                                             &
+            & s_3 \arrow[u, dotted] \arrow[ru, dotted] &
         \end{tikzcd}
 
      % IMITATION 
      \samsubsubsection{(special case of) imitation}
-        We learn from \emph{examples} $a$.
-        The state evolves over time.
+        We learn from \emph{examples} $\lL$.
+        Our actions affect future states.
 
-        \begin{tikzcd} \theta_0 \arrow[rrr, dotted] \arrow[rdd, dotted] &
-            &                                   & \theta_1 \arrow[rrr, dotted]
-            \arrow[rdd, dotted] &
-            &                                                & \theta_2
-            \arrow[rrr, dotted] \arrow[rdd, dotted] &
-            &                                   & \theta_3 \arrow[rd, dotted] &
-            \\ &
-            & \ell_0                               &
+        \noindent%
+        \begin{tikzcd}%
+            \textsf{LRN}_0 \arrow[rrr, dotted] \arrow[rdd,
+        dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_1 \arrow[rrr,
+            dotted] \arrow[rdd, dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_1 \arrow[rrr,
+            dotted] \arrow[rdd, dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_2 \arrow[rdd,
+            dotted] & [-18pt]                                  & [-18pt] \\
             &
-            & \ell_1                                            &
+            & \ell_0     &
             &
-            & \ell_2                               &                             &
-            \hat a_3               \\ & \hat a_0 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
-            & a_0 \arrow[u, dotted] \arrow[ruu] &
-            & \hat a_1 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
-            & a_1 \arrow[u, dotted] \arrow[ruu]              &
-            & \hat a_2 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
-            & a_2 \arrow[u, dotted] \arrow[ruu] &                             &
-            \\ & s_0 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted,
-            bend right=40] \arrow[ruu, dotted] \arrow[rrr] &
-            &                                                  & s_1 \arrow[ru,
-            dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=40]
-            \arrow[ruu, dotted] \arrow[rrr] &
-            &                                                  & s_2 \arrow[ru,
-            dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=40]
-            \arrow[ruu, dotted] \arrow[rrr] &                                   &
-            & s_3 \arrow[uu, dotted] 
+            & \ell_1     &
+            &
+            & \ell_2     &
+            &                                            & \ell_3    \\
+            & \hat a_0 \arrow[ru, dotted, bend right=18] \arrow[rrrd, bend right=18]
+            & \lL_0 \arrow[ruu] \arrow[u, dotted, bend left=18] &
+            & \hat a_1 \arrow[ru, dotted, bend right=18] \arrow[rrrd, bend right=18]
+            & \lL_1 \arrow[ruu] \arrow[u, dotted, bend left=18] &
+            & \hat a_2 \arrow[ru, dotted, bend right=18] \arrow[rrrd, bend right=18]
+            & \lL_2 \arrow[ruu] \arrow[u, dotted, bend left=18] &
+            & \hat a_3 \arrow[ru, dotted, bend right=18]                                  &
+            \lL_3 \arrow[u, dotted, bend left=18] \\ & s_0 \arrow[ru, dotted]
+            \arrow[u, dotted] \arrow[rrr] \arrow[rruuu, dotted, bend right=27] &
+            &
+            & s_1 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27]
+            \arrow[rrr] &                                             &
+            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27]
+            \arrow[rrr] &                                             &
+            & s_3 \arrow[u, dotted] \arrow[ru, dotted] &
         \end{tikzcd}
-        
+
+
       % REINFORCEMENT
       \samsubsubsection{classical reinforcement}
         We learn from \emph{rewards} $-\ell$.
-        The state evolves over time.
+        Our actions affect future states.
         
-        \begin{tikzcd} \theta_0 \arrow[rrr, dotted] \arrow[rdd, dotted] &
-            &                       & \theta_1 \arrow[rrr, dotted] \arrow[rdd,
-            dotted] &
-            &                       & \theta_2 \arrow[rrr, dotted] \arrow[rdd,
-            dotted] &
-            &                       & \theta_3 \arrow[rd, dotted] &
-            \\ &
-            & \ell_0 \arrow[ru]        &
+        \noindent%
+        \begin{tikzcd}%
+            \textsf{LRN}_0 \arrow[rrr, dotted] \arrow[rdd,
+        dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_1 \arrow[rrr,
+            dotted] \arrow[rdd, dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_1 \arrow[rrr,
+            dotted] \arrow[rdd, dotted] & [-18pt]
+            & [-18pt]             & [-18pt] \textsf{LRN}_2 \arrow[rdd,
+            dotted] & [-18pt]                                  & [-18pt] \\
             &
-            & \ell_1 \arrow[ru]        &
+            & \ell_0 \arrow[ru]     &
             &
-            & \ell_2 \arrow[ru]        &                             & \hat a_3
-            \\ & \hat a_0 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
-            & a_0 \arrow[u, dotted] &
-            & \hat a_1 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
-            & a_1 \arrow[u, dotted] &
-            & \hat a_2 \arrow[ru, dotted] \arrow[rrrd, bend right=12]
-            & a_2 \arrow[u, dotted] &                             &
-            \\ & s_0 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted,
-            bend right=40] \arrow[ruu, dotted] \arrow[rrr] &
-            &                                                  & s_1 \arrow[ru,
-            dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=40]
-            \arrow[ruu, dotted] \arrow[rrr] &                       &
-            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend
-            right=40] \arrow[ruu, dotted] \arrow[rrr] &                       &
-            & s_3 \arrow[uu, dotted]
+            & \ell_1 \arrow[ru]     &
+            &
+            & \ell_2 \arrow[ru]     &
+            &                                            & \ell_3    \\
+            & \hat a_0 \arrow[ru, dotted, bend right=18] \arrow[rrrd, bend right=18]
+            & \lL_0 \arrow[u, dotted, bend left=18] &
+            & \hat a_1 \arrow[ru, dotted, bend right=18] \arrow[rrrd, bend right=18]
+            & \lL_1 \arrow[u, dotted, bend left=18] &
+            & \hat a_2 \arrow[ru, dotted, bend right=18] \arrow[rrrd, bend right=18]
+            & \lL_2 \arrow[u, dotted, bend left=18] &
+            & \hat a_3 \arrow[ru, dotted, bend right=18]                                  &
+            \lL_3 \arrow[u, dotted, bend left=18] \\ & s_0 \arrow[ru, dotted]
+            \arrow[u, dotted] \arrow[rrr] \arrow[rruuu, dotted, bend right=27] &
+            &
+            & s_1 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27]
+            \arrow[rrr] &                                             &
+            & s_2 \arrow[ru, dotted] \arrow[u, dotted] \arrow[rruuu, dotted, bend right=27]
+            \arrow[rrr] &                                             &
+            & s_3 \arrow[u, dotted] \arrow[ru, dotted] &
         \end{tikzcd}
       
 \vfill
